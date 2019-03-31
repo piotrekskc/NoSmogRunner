@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainConstrain"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="visible"
+    tools:context="com.example.nosmogrunner.MainMenuActivity"
+    >
+
+    <ImageButton
+        android:id="@+id/runButton"
+        android:layout_width="208dp"
+        android:layout_height="256dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/ic_running_solid"
+        android:scaleY="0.7"
+        android:scaleX="0.7"
+        android:contentDescription="@string/runButtonDescripition"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/smogButton"
+        android:layout_width="208dp"
+        android:layout_height="256dp"
+        android:layout_marginTop="24dp"
+        android:scaleY="0.7"
+        android:scaleX="0.7"
+
+        android:background="@drawable/ic_smog_solid"
+
+        android:contentDescription="@string/smogButtonDescripition"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/mapButton"
+        style="@android:style/Widget.DeviceDefault.ImageButton"
+        android:layout_width="208dp"
+        android:layout_height="256dp"
+        android:layout_marginBottom="24dp"
+        android:scaleY="0.7"
+        android:scaleX="0.7"
+
+        android:background="@drawable/ic_map_regular"
+        android:contentDescription="@string/mapButtonDescripition"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ImageButton
+        android:id="@+id/statsButton"
+        android:layout_width="208dp"
+        android:layout_height="256dp"
+        android:layout_marginBottom="24dp"
+        android:scaleY="0.7"
+        android:scaleX="0.7"
+
+        android:background="@drawable/ic_chart_bar_solid"
+        android:contentDescription="@string/statsButtonDescripition"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</android.support.constraint.ConstraintLayout>

@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">NoSmogRunner</string>
+    <string name="mapButtonDescripition">MAP</string>
+    <string name="statsButtonDescripition">STATS</string>
+    <string name="smogButtonDescripition">SMOG</string>
+    <string name="runButtonDescripition">RUN</string>
+    <string name="title_activity_welcome">NoSmogRunner</string>
+    <string-array name="cities_array">
+        <item>Warsaw</item>
+
+    </string-array>
+
+</resources>

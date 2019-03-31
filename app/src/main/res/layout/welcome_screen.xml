@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:theme="@style/Theme.AppCompat.NoActionBar"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.nosmogrunner.WelcomeActivity"
+    android:orientation="vertical"
+    android:background="@color/gray">
+
+
+    <LinearLayout
+        android:id="@+id/l2"
+        android:layout_marginTop="0dp"
+        android:layout_width="400dp"
+        android:layout_height="500dp"
+        android:orientation="vertical"
+        android:background="@drawable/runner_ilustration"
+        android:layout_gravity="center"
+        >
+
+
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:text="Let's go Running in:"/>
+
+    <Spinner
+        android:id="@+id/citySpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+
+
+</LinearLayout>
