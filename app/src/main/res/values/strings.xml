@@ -5,6 +5,8 @@
     <string name="smogButtonDescripition">SMOG</string>
     <string name="runButtonDescripition">RUN</string>
     <string name="title_activity_welcome">NoSmogRunner</string>
+    <string name="GOOGLE_MAPS_API_KEY">AIzaSyCZt9urQb8cYmTWM21w6ZfnbUyHkJZRxOc</string>
+    <string name="mapViewString">This app is currently limited in this region due to the lack of the smog sensors in rest of the regions.</string>
     <string-array name="cities_array">
         <item>Warsaw</item>
 
