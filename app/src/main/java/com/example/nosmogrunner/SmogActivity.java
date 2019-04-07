@@ -37,20 +37,26 @@ public class SmogActivity extends MainMenuActivity {
             AirlyAsync getSmogData = new AirlyAsync();
         TextView tv = (TextView)findViewById(R.id.textView5);
         tv.setText("Retrieving data...");
+        String data;
+        
         getSmogData.execute();
+
+//this to set delegate/listener back to this class
 
 
         };
 
 
 
-    public class AirlyAsync extends AsyncTask<Void,Void, Void> {
+    public class AirlyAsync extends AsyncTask<Void,String, String> {
+
+        String jsonStringResponse;
         @Override
-        public Void doInBackground(Void...voids) {
+        public String doInBackground(Void...voids) {
 
             URL airlyEndpoint;
             try {
-                airlyEndpoint = new URL("https://airapi.airly.eu/v2/installations/1091");
+                airlyEndpoint = new URL("https://airapi.airly.eu/v2/measurements/nearest?indexType=AIRLY_CAQI&lat=52.229932&lng=21.056501&maxDistanceKM=35");
             }
             catch(MalformedURLException e)
             {
@@ -82,10 +88,10 @@ public class SmogActivity extends MainMenuActivity {
                     while ((inputLine = in.readLine()) != null) {
                      response.append(inputLine);
                     }
-                    in.close();
+
 
                     Log.i("Stream data",response.toString());
-
+                    in.close();
 
                 }
                     // Success
@@ -102,20 +108,28 @@ public class SmogActivity extends MainMenuActivity {
                 //JSONObject rootObject = new JSONObject(response.toString());
 
                 JSONObject object = new JSONObject(response.toString());
-                JSONObject address  = object.getJSONObject("address");
-                Log.i("country",address.getString("country"));
-                Log.i("city",address.getString("city"));
-                Log.i("street",address.getString("street"));
-                Log.i("number",address.getString("number"));
-                Log.i("displayAddress1",address.getString("displayAddress1"));
-                Log.i("displayAddress2",address.getString("displayAddress2"));
-
+                jsonStringResponse = response.toString();
+//                JSONObject address  = object.getJSONObject("address");
+//                Log.i("country",address.getString("country"));
+//                Log.i("city",address.getString("city"));
+//                Log.i("street",address.getString("street"));
+//                Log.i("number",address.getString("number"));
+//                Log.i("displayAddress1",address.getString("displayAddress1"));
+//                Log.i("displayAddress2",address.getString("displayAddress2"));
+                return jsonStringResponse;
 
             }
             catch(JSONException e){
                 throw new RuntimeException(e);
             }
-            return null;
+
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            TextView tv = (TextView)findViewById(R.id.textView5);
+            tv.setText(jsonStringResponse);
         }
     }
 
