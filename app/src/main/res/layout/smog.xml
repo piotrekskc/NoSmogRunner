@@ -20,7 +20,7 @@
         tools:onClick="getMessage" />
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/smogTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -28,7 +28,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
-        android:text="Warsaw smog measurements:"
+        android:text="@string/smogTitle"
 
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -42,7 +42,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginLeft="24dp"
         android:layout_marginTop="50dp"
-        android:text="Warsaw temperature:"
+        android:text="@string/cityText"
         android:textSize="25sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" /><!--Display Text as AbhiAndroid-->
@@ -58,7 +58,7 @@
         android:textSize="25sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cityText"
-        android:text="CAQI standard value:" />
+        android:text="@string/CAQIText" />
 
     <TextView
         android:id="@+id/CAQILevelText"
@@ -71,7 +71,7 @@
         android:textSize="25sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/CAQIText"
-        android:text="Smog level:" />
+        android:text="@string/CAQILevelText" />
 
     <TextView
         android:id="@+id/DescriptionText"
@@ -81,7 +81,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginLeft="24dp"
         android:layout_marginTop="16dp"
-        android:text="Description:"
+        android:text="@string/DescriptionText"
         android:textAppearance="@style/TextAppearance.AppCompat"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/CAQILevelText" />
@@ -94,7 +94,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginLeft="24dp"
         android:layout_marginTop="16dp"
-        android:text="Advice:"
+        android:text="@string/adviceText"
         android:textAppearance="@style/TextAppearance.AppCompat"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/descriptionValue" />
@@ -119,44 +119,41 @@
         android:layout_marginStart="24dp"
         android:layout_marginLeft="24dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         android:textAppearance="@style/TextAppearance.AppCompat"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/adviceText" />
 
     <TextView
         android:id="@+id/CAQIValue"
-        android:layout_width="91dp"
+        android:layout_width="102dp"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginRight="20dp"
         android:textSize="25sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cityText" />
 
     <TextView
         android:id="@+id/CAQILevelValue"
-        android:layout_width="101dp"
+        android:layout_width="126dp"
         android:layout_height="34dp"
         android:layout_centerInParent="true"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginRight="20dp"
         android:textSize="25sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/CAQIText" />
 
     <TextView
         android:id="@+id/temperatureValue"
-        android:layout_width="85dp"
+        android:layout_width="102dp"
         android:layout_height="34dp"
         android:layout_centerInParent="true"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginRight="20dp"
         android:textSize="25sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/cityText" />
@@ -167,60 +164,56 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginLeft="24dp"
-        android:layout_marginTop="16dp"
-        android:text="PM 1"
+        android:layout_marginTop="32dp"
+        android:text="@string/pm1Text"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/adviceValue"
-         />
+        app:layout_constraintTop_toBottomOf="@+id/adviceValue" />
 
     <TextView
         android:id="@+id/pm1Value"
         android:layout_width="41dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginLeft="24dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pm1Text" />
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintStart_toEndOf="@+id/pm1Text"
+        app:layout_constraintTop_toTopOf="@+id/pm1Text" />
 
     <TextView
         android:id="@+id/pm25Value"
         android:layout_width="41dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:layout_constraintStart_toStartOf="@+id/pm25Text"
-        app:layout_constraintTop_toBottomOf="@+id/pm25Text" />
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintStart_toEndOf="@+id/pm25Text"
+        app:layout_constraintTop_toTopOf="@+id/pm25Text" />
 
     <TextView
         android:id="@+id/pm10Value"
         android:layout_width="41dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:layout_constraintStart_toStartOf="@+id/pm10Text"
-        app:layout_constraintTop_toBottomOf="@+id/pm10Text" />
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintStart_toEndOf="@+id/pm10Text"
+        app:layout_constraintTop_toTopOf="@+id/pm10Text" />
 
     <TextView
         android:id="@+id/pm25Text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginLeft="32dp"
-        android:layout_marginTop="16dp"
 
-        android:text="PM 25"
-        app:layout_constraintStart_toEndOf="@+id/pm1Text"
-        app:layout_constraintTop_toBottomOf="@+id/adviceValue" />
+        android:layout_marginTop="24dp"
+        android:text="@string/pm25Text"
+        app:layout_constraintStart_toStartOf="@+id/pm1Text"
+        app:layout_constraintTop_toBottomOf="@+id/pm1Text" />
 
     <TextView
         android:id="@+id/pm10Text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginLeft="24dp"
-        android:layout_marginTop="16dp"
 
-        app:layout_constraintStart_toEndOf="@+id/pm25Text"
-        app:layout_constraintTop_toBottomOf="@+id/adviceValue"
-        android:text="PM 10" />
+        android:layout_marginTop="24dp"
+        android:text="@string/pm10Text"
+        app:layout_constraintStart_toStartOf="@+id/pm25Text"
+        app:layout_constraintTop_toBottomOf="@+id/pm25Text" />
 
 </android.support.constraint.ConstraintLayout>

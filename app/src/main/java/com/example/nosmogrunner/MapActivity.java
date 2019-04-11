@@ -10,7 +10,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONArray;
@@ -46,8 +45,7 @@ public class MapActivity extends MainMenuActivity implements OnMapReadyCallback 
         LatLng northeast = new LatLng(52.4836,21.2837);
         LatLng southwest = new LatLng(51.9871,20.7452);
         LatLngBounds warsawBounds = new LatLngBounds(southwest,northeast);
-        googleMap.addMarker(new MarkerOptions().position(warsaw)
-                .title("Marker in Warsaw"));
+
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(warsaw));
 
         DrawPolyline myDrawing = new DrawPolyline();

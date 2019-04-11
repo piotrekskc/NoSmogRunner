@@ -3,14 +3,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.nosmogrunner">
 
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true"/>
+
+
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
          location permissions for the 'MyLocation' functionality.
     -->
+    <!--
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    -->
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+
+
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
 
     <application
         android:allowBackup="true"
@@ -20,6 +34,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+
+
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
+
+
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -31,7 +52,12 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/GOOGLE_MAPS_API_KEY" />
+            android:value="AIzaSyCkfilaYmGTn34wncNS0Yu-OWK8pnOZkXs" />
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+
 
         <activity
             android:name=".WelcomeActivity"

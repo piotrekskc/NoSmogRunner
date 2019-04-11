@@ -142,7 +142,7 @@ public class SmogActivity extends MainMenuActivity {
                 params[0].pm1 = measurementValues.get(0);
                 params[0].pm25 = measurementValues.get(1);
                 params[0].pm10 = measurementValues.get(2);
-                params[0].temperature = measurementValues.get(3);
+                params[0].temperature = measurementValues.get(5);
 
 //                for (int i = 0; i<CAQIindex.length();i++){
 //                    JSONObject readValue = CAQIindex.getJSONObject(i);
@@ -176,6 +176,8 @@ public class SmogActivity extends MainMenuActivity {
 
             text = (TextView)findViewById(R.id.CAQIValue);
             text.setText(params.indexValue);
+            text = (TextView)findViewById(R.id.temperatureValue);
+            text.setText(params.temperature + " \u00b0C");
             text = (TextView)findViewById(R.id.CAQILevelValue);
             text.setText(params.indexLevel);
             text.setTextColor(Color.parseColor(params.indexColor));
