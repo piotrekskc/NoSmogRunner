@@ -37,12 +37,15 @@ public class MainMenuActivity extends WelcomeActivity {
 
     private FusedLocationProviderClient mFusedLocationProviderClient;
 
+    public myFirstKnownLocation myLocation;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getSupportActionBar().hide();
         setContentView(R.layout.main_menu);
-
+        myLocation = new myFirstKnownLocation(52.224485,21.0933817);
 
         ImageButton runB = (ImageButton) findViewById(R.id.runButton);
         ImageButton chartB = (ImageButton) findViewById(R.id.statsButton);
@@ -92,7 +95,7 @@ public class MainMenuActivity extends WelcomeActivity {
 
     }
 
-    private void getLastKnownLocation() {
+    public void getLastKnownLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             return;
@@ -104,6 +107,8 @@ public class MainMenuActivity extends WelcomeActivity {
                         // Got last known location. In some rare situations this can be null.
                         if (location != null) {
                             Log.d(TAG,"Longitude: "+location.getLongitude()+" Latitude: "+ location.getLatitude());
+                            myLocation.Latitude = location.getLatitude();
+                            myLocation.Longitude= location.getLongitude();
                         }
                     }
                 });
@@ -240,6 +245,15 @@ public class MainMenuActivity extends WelcomeActivity {
 
     }
 
+    public class myFirstKnownLocation{
+        double Latitude;
+        double Longitude;
+
+        public myFirstKnownLocation(double latitude, double longitude) {
+            Latitude = latitude;
+            Longitude = longitude;
+        }
+    }
 
 
 

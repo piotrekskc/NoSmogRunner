@@ -5,9 +5,12 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
 
 import static com.example.nosmogrunner.utils.Constants.MAPVIEW_BUNDLE_KEY;
 
@@ -19,8 +22,13 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback 
 
     //widgets
     private MapView mMapView;
+    private FusedLocationProviderClient mFusedLocationClient;
 
     //vars
+    private GoogleMap mGoogleMap;
+    private LatLng mMapPosition;
+    private double firstLongitudePosition;
+    private double firstLatitudePosition;
 
 
     private static final float DEFAULT_ZOOM = 15f;
@@ -57,6 +65,10 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback 
         mMapView.onSaveInstanceState(mapViewBundle);
     }
 
+    private void setCameraView(LatLng position, GoogleMap map,float zoom){
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(position,zoom));
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -89,6 +101,13 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback 
             return;
         }
         map.setMyLocationEnabled(true);
+
+
+        double longitude = myLocation.Longitude;
+        double latitude = myLocation.Latitude;
+
+        mMapPosition = new LatLng(latitude,longitude);
+        setCameraView(mMapPosition,map,DEFAULT_ZOOM);
     }
 
 
