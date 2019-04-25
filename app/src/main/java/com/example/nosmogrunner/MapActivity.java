@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-public class MapActivity extends MainMenuActivity implements OnMapReadyCallback {
+public class MapActivity extends MainMenuActivity implements OnMapReadyCallback,TaskLoadedCallback {
 @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -148,7 +148,10 @@ public class MapActivity extends MainMenuActivity implements OnMapReadyCallback 
     }
 
 
+    @Override
+    public void onTaskDone(Object... values) {
 
+    }
 
 
 }

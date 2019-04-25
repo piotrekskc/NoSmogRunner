@@ -25,7 +25,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-public class MainMenuActivity extends WelcomeActivity {
+public class MainMenuActivity extends WelcomeActivity implements TaskLoadedCallback {
 
     private static final String TAG = "MainMenuActivity";
 
@@ -242,6 +242,10 @@ public class MainMenuActivity extends WelcomeActivity {
                 }
             }
         }
+
+    }
+    @Override
+    public void onTaskDone(Object... values) {
 
     }
 

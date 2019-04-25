@@ -10,4 +10,9 @@ public class StatsActivity extends MainMenuActivity {
         setContentView(R.layout.stats);
         getSupportActionBar().hide();
     }
+
+    @Override
+    public void onTaskDone(Object... values) {
+
+    }
 }
