@@ -27,5 +27,9 @@
         <item>Warsaw</item>
 
     </string-array>
+    <string-array name="activities_array">
+        <item>walking</item>
+        <item>cycling</item>
+    </string-array>
 
 </resources>

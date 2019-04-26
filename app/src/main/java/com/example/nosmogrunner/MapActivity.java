@@ -149,7 +149,7 @@ public class MapActivity extends MainMenuActivity implements OnMapReadyCallback,
 
 
     @Override
-    public void onTaskDone(Object... values) {
+    public void onTaskDone(ArrayList... values) {
 
     }
 

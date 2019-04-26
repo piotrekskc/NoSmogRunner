@@ -203,7 +203,7 @@ public class SmogActivity extends MainMenuActivity {
     }
 
     @Override
-    public void onTaskDone(Object... values) {
+    public void onTaskDone(ArrayList... values) {
 
     }
 

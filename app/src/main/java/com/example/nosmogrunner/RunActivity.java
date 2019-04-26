@@ -4,11 +4,14 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -22,6 +25,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.nosmogrunner.utils.Constants.MAPVIEW_BUNDLE_KEY;
@@ -46,9 +50,10 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
     LatLng endRunPosition;
     private LatLng mMapPosition;
     GoogleMap drawedMap;
-
+    private ArrayList<Polyline> mPolylines = new ArrayList<>();
     RelativeLayout foundPointLayout;
     RelativeLayout addressLayout;
+    String chosenMode;
 
 
 
@@ -144,6 +149,26 @@ addressLayout = findViewById(R.id.relLayout1);
         mUiSettings.setTiltGesturesEnabled(true);
         mUiSettings.setRotateGesturesEnabled(true);
 
+
+        map.setOnPolylineClickListener(new GoogleMap.OnPolylineClickListener() {
+            @Override
+            public void onPolylineClick(Polyline polyline) {
+                polyline.setColor(ContextCompat.getColor(RunActivity.this,R.color.blue));
+
+
+                  for(int i = 0;i<mPolylines.size();i++) {
+                      if (polyline.getZIndex() == mPolylines.get(i).getZIndex()) {
+                          mPolylines.get(i).setColor(ContextCompat.getColor(RunActivity.this, R.color.blue));
+
+                      } else {
+                          mPolylines.get(i).setColor(ContextCompat.getColor(RunActivity.this, R.color.gray));
+
+                      }
+                  }
+                }
+
+        });
+
         map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(final LatLng point) {
@@ -172,7 +197,15 @@ addressLayout = findViewById(R.id.relLayout1);
 
                 startButton = findViewById(R.id.startButton);
                 endButton= findViewById(R.id.endButton);
-
+                Spinner spinner = (Spinner) findViewById(R.id.activitySpinner);
+               // Create an ArrayAdapter using the string array and a default spinner layout
+                ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getApplicationContext(),
+                        R.array.activities_array, android.R.layout.simple_spinner_item);
+                // Specify the layout to use when the list of choices appears
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                // Apply the adapter to the spinner
+                spinner.setAdapter(adapter);
+                chosenMode = spinner.getSelectedItem().toString();
 
                 startButton.setOnClickListener(new Button.OnClickListener() {
                     @Override
@@ -182,7 +215,7 @@ addressLayout = findViewById(R.id.relLayout1);
                         Toast.makeText(RunActivity.this,"You have set the start point!",Toast.LENGTH_SHORT).show();
 
                         if(startRunPosition != null && endRunPosition != null){
-                            new FetchURL(RunActivity.this).execute(getUrl(startRunPosition,endRunPosition, "driving"), "driving");
+                            new FetchURL(RunActivity.this).execute(getUrl(startRunPosition,endRunPosition, chosenMode), chosenMode);
                             map.clear();
                             map.addMarker(new MarkerOptions().
                                     position(startRunPosition).
@@ -205,7 +238,7 @@ addressLayout = findViewById(R.id.relLayout1);
 
 
                         if(startRunPosition != null && endRunPosition != null){
-                            new FetchURL(RunActivity.this).execute(getUrl(startRunPosition,endRunPosition, "driving"), "driving");
+                            new FetchURL(RunActivity.this).execute(getUrl(startRunPosition,endRunPosition, chosenMode), chosenMode);
                             map.clear();
                             map.addMarker(new MarkerOptions().
                                     position(startRunPosition).
@@ -223,6 +256,9 @@ addressLayout = findViewById(R.id.relLayout1);
 
 
 
+
+
+
             }
         });
 
@@ -236,8 +272,11 @@ addressLayout = findViewById(R.id.relLayout1);
         String str_dest = "destination=" + dest.latitude + "," + dest.longitude;
         // Mode
         String mode = "mode=" + directionMode;
+        //Alternatives
+        String alternatives = "alternatives=true";
+
         // Building the parameters to the web service
-        String parameters = str_origin + "&" + str_dest + "&" + mode;
+        String parameters = str_origin + "&" + str_dest + "&" + mode + "&" +alternatives;
         // Output format
         String output = "json";
         // Building the url to the web service
@@ -246,10 +285,26 @@ addressLayout = findViewById(R.id.relLayout1);
     }
 
     @Override
-    public void onTaskDone(Object... values) {
+    public void onTaskDone(ArrayList... values) {
         if (currentPolyline != null)
             currentPolyline.remove();
-        currentPolyline = drawedMap.addPolyline((PolylineOptions) values[0]);
+        PolylineOptions lineOptions = null;
+
+        for(int i = 0;i<values[0].size();i++) {
+            ArrayList<LatLng> workingArray = (ArrayList<LatLng>) values[0].get(i);
+
+            lineOptions = new PolylineOptions();
+
+            lineOptions.addAll(workingArray);
+            lineOptions.width(10);
+            lineOptions.clickable(true);
+            lineOptions.color(ContextCompat.getColor(this,R.color.gray));
+
+            currentPolyline = drawedMap.addPolyline(lineOptions);
+            currentPolyline.setZIndex(i);
+            mPolylines.add(currentPolyline);
+
+        }
         zoomRoute(currentPolyline.getPoints());
     }
 
@@ -313,6 +368,8 @@ addressLayout = findViewById(R.id.relLayout1);
         super.onLowMemory();
         mMapView.onLowMemory();
     }
+
+
 
 
 }

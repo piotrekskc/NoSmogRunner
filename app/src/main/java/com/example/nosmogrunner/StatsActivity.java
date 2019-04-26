@@ -2,6 +2,8 @@ package com.example.nosmogrunner;
 
 import android.os.Bundle;
 
+import java.util.ArrayList;
+
 public class StatsActivity extends MainMenuActivity {
 
     @Override
@@ -12,7 +14,7 @@ public class StatsActivity extends MainMenuActivity {
     }
 
     @Override
-    public void onTaskDone(Object... values) {
+    public void onTaskDone(ArrayList... values) {
 
     }
 }

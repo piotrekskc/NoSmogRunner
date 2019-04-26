@@ -25,6 +25,8 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.util.ArrayList;
+
 public class MainMenuActivity extends WelcomeActivity implements TaskLoadedCallback {
 
     private static final String TAG = "MainMenuActivity";
@@ -245,7 +247,7 @@ public class MainMenuActivity extends WelcomeActivity implements TaskLoadedCallb
 
     }
     @Override
-    public void onTaskDone(Object... values) {
+    public void onTaskDone(ArrayList... values) {
 
     }
 
