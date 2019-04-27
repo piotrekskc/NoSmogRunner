@@ -216,4 +216,34 @@
         app:layout_constraintStart_toStartOf="@+id/pm25Text"
         app:layout_constraintTop_toBottomOf="@+id/pm25Text" />
 
+    <ProgressBar
+        android:id="@+id/PM1progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="217dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        app:layout_constraintStart_toEndOf="@+id/pm1Value"
+        app:layout_constraintTop_toTopOf="@+id/pm1Value"
+        android:max="60"/>
+
+    <ProgressBar
+        android:id="@+id/PM25progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="217dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@+id/PM1progressBar"
+        app:layout_constraintTop_toTopOf="@+id/pm25Value"
+        android:max="25"
+        />
+
+    <ProgressBar
+        android:id="@+id/PM10progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="217dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@+id/PM25progressBar"
+        app:layout_constraintTop_toTopOf="@+id/pm10Value"
+        android:max="50"
+        />
+
 </android.support.constraint.ConstraintLayout>

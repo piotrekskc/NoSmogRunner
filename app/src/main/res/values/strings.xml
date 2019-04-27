@@ -5,7 +5,7 @@
     <string name="smogButtonDescripition">SMOG</string>
     <string name="runButtonDescripition">RUN</string>
     <string name="title_activity_welcome">NoSmogRunner</string>
-    <string name="GOOGLE_MAPS_API_KEY"> AIzaSyCkfilaYmGTn34wncNS0Yu-OWK8pnOZkXs </string>
+    <string name="GOOGLE_MAPS_API_KEY"> AIzaSyBS2nd3ts5S8Lpkzb3yYOymUgzVySjeWbQ </string>
     <string name="mapViewString">This app is currently limited in this region due to the lack of the smog sensors in rest of the regions.</string>
     <string name="AIRLY_API_KEY">smD7lvjAAYAmArkXDcACunq0p0OldmTT</string>
 

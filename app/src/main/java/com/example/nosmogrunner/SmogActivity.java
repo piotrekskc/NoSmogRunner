@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -197,8 +198,33 @@ public class SmogActivity extends MainMenuActivity {
             text.setText(params.pm25);
             text.setTextColor(Color.parseColor(params.indexColor));
 
+            //PM10 max 50 PM25 25 Pm1 60
+            ProgressBar progressBar10 = (ProgressBar) findViewById(R.id.PM10progressBar);
+            ProgressBar progressBar1 = (ProgressBar) findViewById(R.id.PM1progressBar);
+            ProgressBar progressBar25 = (ProgressBar) findViewById(R.id.PM25progressBar);
+
+            int pm1,pm10,pm25;
+            pm1 = (int) Float.parseFloat(params.pm1);
+            pm10 = (int) Float.parseFloat(params.pm10);
+            pm25 = (int) Float.parseFloat(params.pm25);
 
 
+            if((int) Float.parseFloat(params.pm1)>60){
+                pm1 = 60;
+            }
+            if((int) Float.parseFloat(params.pm10)>50){
+                pm10 = 50;
+            }
+            if((int) Float.parseFloat(params.pm25)>25){
+                pm25 = 25;
+            }
+
+            progressBar1.setProgress(pm1);
+            progressBar1.setBackgroundColor(Color.parseColor(params.indexColor));
+            progressBar10.setProgress(pm10);
+            progressBar10.setBackgroundColor(Color.parseColor(params.indexColor));
+            progressBar25.setProgress(pm25);
+            progressBar25.setBackgroundColor(Color.parseColor(params.indexColor));
         }
     }
 

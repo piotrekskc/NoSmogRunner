@@ -109,6 +109,7 @@ public class MainMenuActivity extends WelcomeActivity {
                             Log.d(TAG,"Longitude: "+location.getLongitude()+" Latitude: "+ location.getLatitude());
                             myLocation.Latitude = location.getLatitude();
                             myLocation.Longitude= location.getLongitude();
+
                         }
                     }
                 });
@@ -244,6 +245,8 @@ public class MainMenuActivity extends WelcomeActivity {
         }
 
     }
+
+
 
     public class myFirstKnownLocation{
         double Latitude;

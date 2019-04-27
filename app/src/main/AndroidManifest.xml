@@ -24,7 +24,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:allowBackup="true"
@@ -52,7 +52,7 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCkfilaYmGTn34wncNS0Yu-OWK8pnOZkXs" />
+            android:value="AIzaSyBS2nd3ts5S8Lpkzb3yYOymUgzVySjeWbQ" />
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
@@ -73,6 +73,11 @@
         <activity android:name=".StatsActivity" ></activity>
         <activity android:name=".SmogActivity" ></activity>
         <activity android:name=".MapActivity" ></activity>
+
+        <service android:name=".services.LocationService"
+            android:stopWithTask="true">
+        </service>
+
     </application>
 
 </manifest>
