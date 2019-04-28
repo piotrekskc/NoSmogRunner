@@ -1,4 +1,4 @@
-package com.example.nosmogrunner;
+package com.example.nosmogrunner.Activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +10,8 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
+
+import com.example.nosmogrunner.R;
 
 public class WelcomeActivity extends AppCompatActivity
 {

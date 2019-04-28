@@ -60,7 +60,7 @@
 
 
         <activity
-            android:name=".WelcomeActivity"
+            android:name=".Activities.WelcomeActivity"
             android:label="@string/title_activity_welcome">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -68,11 +68,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainMenuActivity" ></activity>
-        <activity android:name=".RunActivity" ></activity>
-        <activity android:name=".StatsActivity" ></activity>
-        <activity android:name=".SmogActivity" ></activity>
-        <activity android:name=".MapActivity" ></activity>
+        <activity android:name=".Activities.MainMenuActivity" ></activity>
+        <activity android:name=".Activities.RunActivity" ></activity>
+        <activity android:name=".Activities.StatsActivity" ></activity>
+        <activity android:name=".Activities.SmogActivity" ></activity>
+        <activity android:name=".Activities.MapActivity" ></activity>
 
         <service android:name=".services.LocationService"
             android:stopWithTask="true">

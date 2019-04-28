@@ -1,6 +1,8 @@
-package com.example.nosmogrunner;
+package com.example.nosmogrunner.Activities;
 
 import android.os.Bundle;
+
+import com.example.nosmogrunner.R;
 
 public class StatsActivity extends MainMenuActivity {
 

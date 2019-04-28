@@ -13,7 +13,7 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.example.nosmogrunner.MapActivity" />
+        tools:context="com.example.nosmogrunner.Activities.MapActivity" />
 
     <TextView
         android:id="@+id/textView"

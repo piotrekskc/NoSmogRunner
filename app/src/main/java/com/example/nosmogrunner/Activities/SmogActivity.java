@@ -1,4 +1,4 @@
-package com.example.nosmogrunner;
+package com.example.nosmogrunner.Activities;
 
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -7,6 +7,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.example.nosmogrunner.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;

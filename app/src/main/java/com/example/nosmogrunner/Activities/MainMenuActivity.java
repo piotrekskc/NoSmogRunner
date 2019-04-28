@@ -1,4 +1,4 @@
-package com.example.nosmogrunner;
+package com.example.nosmogrunner.Activities;
 
 
 import android.Manifest;
@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.example.nosmogrunner.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;

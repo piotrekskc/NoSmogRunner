@@ -1,9 +1,12 @@
-package com.example.nosmogrunner;
+package com.example.nosmogrunner.Activities;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -12,9 +15,12 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.example.nosmogrunner.R;
+import com.example.nosmogrunner.models.PolylineData;
 import com.example.nosmogrunner.models.UserLocation;
 import com.example.nosmogrunner.services.LocationService;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -25,6 +31,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -43,7 +51,7 @@ import static com.example.nosmogrunner.services.LocationService.getUserLocationO
 import static com.example.nosmogrunner.utils.Constants.MAPVIEW_BUNDLE_KEY;
 
 
-public class RunActivity extends MainMenuActivity implements OnMapReadyCallback {
+public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,GoogleMap.OnInfoWindowClickListener,GoogleMap.OnPolylineClickListener {
 
     private static final String TAG = "RunActivity";
 
@@ -65,6 +73,7 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback 
     private static final int LOCATION_UPDATE_INTERVAL = 3000;
     private UiSettings mUiSettings;
     private GeoApiContext mGeoApiContext;
+    private ArrayList<PolylineData> mPolylinesData=new ArrayList<>();
 
     public RelativeLayout walkOrRunLayout;
     public MarkerOptions defaultMarkerOptions;
@@ -72,8 +81,9 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback 
     public MarkerOptions markerFinishOptions;
     private static final float DEFAULT_ZOOM = 15f;
     public LatLng currentClickPosition;
-
-
+    private Marker infoRouteMarker;
+    private ImageButton refreshButton;
+    private int travelMode = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,6 +91,16 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback 
         getSupportActionBar().hide();
 
         mMapView = findViewById(R.id.user_map);
+        refreshButton = findViewById(R.id.refreshButton);
+        refreshButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(drawedMap != null) {
+                    drawedMap.clear();
+                }
+            }
+        });
+
 
         Bundle mapViewBundle = null;
         if (savedInstanceState != null) {
@@ -116,6 +136,7 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback 
     public void onResume() {
         super.onResume();
         mMapView.onResume();
+        startUserLocationsRunnable();
     }
 
     @Override
@@ -165,6 +186,8 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback 
         mUiSettings.setRotateGesturesEnabled(true);
         walkOrRunLayout.setVisibility(View.VISIBLE);
         Button goButton = (Button) findViewById(R.id.GoButton);
+        map.setOnPolylineClickListener(this);
+
         map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(final LatLng point) {
@@ -263,7 +286,7 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback 
             @Override
             public void onClick(View v) {
                 if (startRunPosition != null && endRunPosition != null) {
-                    int travelMode = 0;
+
                     drawedMap.clear();
 
                     markerFinishOptions = new MarkerOptions();
@@ -448,6 +471,16 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback 
             @Override
             public void run() {
                 Log.d(TAG, "run: result routes: " + result.routes.length);
+                if(mPolylinesData.size()>0){
+                    for(PolylineData polylineData: mPolylinesData){
+                        polylineData.getPolyline().remove();
+
+                    }
+                    mPolylinesData.clear();
+                    mPolylinesData = new ArrayList<>();
+
+                }
+
 
                 for(DirectionsRoute route: result.routes){
                     Log.d(TAG, "run: leg: " + route.legs[0].toString());
@@ -458,8 +491,7 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback 
                     // This loops through all the LatLng coordinates of ONE polyline.
                     for(com.google.maps.model.LatLng latLng: decodedPath){
 
-//                        Log.d(TAG, "run: latlng: " + latLng.toString());
-
+                        // Log.d(TAG, "run: latlng: " + latLng.toString());
                         newDecodedPath.add(new LatLng(
                                 latLng.lat,
                                 latLng.lng
@@ -469,11 +501,149 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback 
                     polyline.setColor(ContextCompat.getColor(RunActivity.this, R.color.gray));
                     polyline.setClickable(true);
 
+                    mPolylinesData.add(new PolylineData(polyline,route.legs[0]));
                 }
+                LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                builder.include(mPolylinesData.get(0).getPolyline().getPoints().get(0));
+                int lastIndex = mPolylinesData.get(0).getPolyline().getPoints().size()-1 ;
+                builder.include(mPolylinesData.get(0).getPolyline().getPoints().get(lastIndex));
+                LatLngBounds bounds = builder.build();
+
+                drawedMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds,200));
             }
         });
     }
+    @Override
+    public void onInfoWindowClick(final Marker marker) {
 
+            final AlertDialog.Builder builder = new AlertDialog.Builder(RunActivity.this);
+            builder.setMessage("Are you at the start of the route?")
+                    .setCancelable(true)
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                            String travelmode = "walking";
+                            if(travelMode==1){
+                                travelmode = "cycling";
+                            }
+                            int tripIndex = 0;
+                        for(int i = 0; i < mPolylinesData.size();i++)
+                        {
+
+                            String title = "Trip number: "+i;
+                            if(marker.getTitle().equals(title)){
+                                tripIndex = i;
+                            }
+                        }
+                        int polylineSize = mPolylinesData.get(tripIndex).getPolyline().getPoints().size()-1;
+                        List<LatLng> currentPolylineWaypoints = mPolylinesData.get(tripIndex).getPolyline().getPoints();
+
+                            String url;
+                            if(polylineSize > 6) {
+                                url = "https://www.google.com/maps/dir/?api=1&origin="
+                                        + startRunPosition.latitude
+                                        + ","
+                                        + startRunPosition.longitude
+                                        + "&destination="
+                                        + endRunPosition.latitude
+                                        + ","
+                                        + endRunPosition.longitude
+                                        + "&travelmode="
+                                        + travelmode
+                                        + "&waypoints="
+                                        + currentPolylineWaypoints.get(2 * polylineSize / 6).latitude + "," + currentPolylineWaypoints.get(2 * polylineSize / 6).longitude
+                                        + "|"
+                                        + currentPolylineWaypoints.get(3 * polylineSize / 6).latitude + "," + currentPolylineWaypoints.get(3 * polylineSize / 6).longitude
+                                        + "|"
+                                        + currentPolylineWaypoints.get(4 * polylineSize / 6).latitude + "," + currentPolylineWaypoints.get(4 * polylineSize / 6).longitude
+                                        + "|"
+                                        + currentPolylineWaypoints.get(5 * polylineSize / 6).latitude + "," + currentPolylineWaypoints.get(5 * polylineSize / 6).longitude;
+                            }
+                             else
+                            {
+                                url = "https://www.google.com/maps/dir/?api=1&origin="
+                                        + startRunPosition.latitude
+                                        + ","
+                                        + startRunPosition.longitude
+                                        + "&destination="
+                                        + endRunPosition.latitude
+                                        + ","
+                                        + endRunPosition.longitude
+                                        + "&travelmode="
+                                        + travelmode
+                                        + "&waypoints="
+                                        + currentPolylineWaypoints.get(polylineSize / 2).latitude + "," + currentPolylineWaypoints.get(polylineSize / 2).longitude;
+
+                            }
+                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                            startActivity(intent);
+
+
+//                            Uri gmmIntentUri = Uri.parse("google.navigation:q=" + endRunPosition.latitude + "," + endRunPosition.longitude);
+//                            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+//                            mapIntent.setPackage("com.google.android.apps.maps");
+
+                            try{
+                                if (intent.resolveActivity(RunActivity.this.getPackageManager()) != null) {
+                                    startActivity(intent);
+                                }
+                            }catch (NullPointerException e){
+                                Log.e(TAG, "onClick: NullPointerException: Couldn't open map." + e.getMessage() );
+                                Toast.makeText(RunActivity.this, "Couldn't open map", Toast.LENGTH_SHORT).show();
+                            }
+
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                            dialog.cancel();
+                        }
+                    });
+            final AlertDialog alert = builder.create();
+            alert.show();
+    }
+
+
+
+
+
+    @Override
+    public void onPolylineClick(Polyline polyline) {
+
+
+        int index = 0;
+        for(PolylineData polylineData: mPolylinesData){
+
+            Log.d(TAG, "onPolylineClick: toString: " + polylineData.toString());
+            if(polyline.getId().equals(polylineData.getPolyline().getId())){
+                polylineData.getPolyline().setColor(ContextCompat.getColor(RunActivity.this, R.color.blue));
+                polylineData.getPolyline().setZIndex(1);
+                int middleIndex = (polylineData.getPolyline().getPoints().size() - 1)/2;
+
+                LatLng middleLocation = polylineData.getPolyline().getPoints().get(middleIndex);
+
+                if(infoRouteMarker != null) {
+                    infoRouteMarker.remove();
+                }
+                infoRouteMarker = drawedMap.addMarker(new MarkerOptions().
+                        position(middleLocation).
+                        title("Trip number: " + index).
+                        snippet("Duration: "+polylineData.getLeg().duration + " Distance: " + polylineData.getLeg().distance));
+
+                drawedMap.setOnInfoWindowClickListener(this);
+                infoRouteMarker.showInfoWindow();
+
+
+
+            }
+            else{
+                polylineData.getPolyline().setColor(ContextCompat.getColor(RunActivity.this, R.color.gray));
+                polylineData.getPolyline().setZIndex(0);
+            }
+
+            index++;
+        }
+
+    }
 }
 
 
