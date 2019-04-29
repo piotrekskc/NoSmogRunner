@@ -6,20 +6,25 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.nosmogrunner.R;
+import com.example.nosmogrunner.models.MySmogParameters;
 import com.example.nosmogrunner.models.PolylineData;
 import com.example.nosmogrunner.models.UserLocation;
 import com.example.nosmogrunner.services.LocationService;
@@ -44,8 +49,20 @@ import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.DirectionsRoute;
 import com.google.maps.model.TravelMode;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import static com.example.nosmogrunner.services.LocationService.getUserLocationObject;
 import static com.example.nosmogrunner.utils.Constants.MAPVIEW_BUNDLE_KEY;
@@ -84,6 +101,14 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
     private Marker infoRouteMarker;
     private ImageButton refreshButton;
     private int travelMode = 0;
+    public MySmogParameters mSmogParameters;
+
+    public TextView pm1RouteValue;
+    public TextView pm10RouteValue;
+    public TextView pm25RouteValue;
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,7 +135,9 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
         mMapView.onCreate(mapViewBundle);
         mMapView.getMapAsync(this);
         walkOrRunLayout = findViewById(R.id.walkOrRunLayout);
-
+        pm1RouteValue = findViewById(R.id.pm1RouteValue);
+        pm10RouteValue = findViewById(R.id.pm10RouteValue);
+        pm25RouteValue = findViewById(R.id.pm25RouteValue);
 
     }
 
@@ -236,8 +263,9 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
 
                         markerStartOptions.position(startRunPosition);
                         drawedMap.addMarker(markerStartOptions);
-                        Toast.makeText(RunActivity.this,"You have set the start point!",Toast.LENGTH_SHORT).show();
-
+                        Toast startPoint=Toast.makeText(RunActivity.this,"You have set the start point!",Toast.LENGTH_SHORT);
+                        startPoint.setGravity(Gravity.TOP|Gravity.CENTER, 0, 0);
+                        startPoint.show();
                         if( endRunPosition != null){
                             markerFinishOptions = new MarkerOptions();
                             markerFinishOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
@@ -254,7 +282,9 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
                         drawedMap.clear();
                         endRunPosition = new LatLng(point.latitude, point.longitude);
                         markerFinishOptions = new MarkerOptions();
-                        Toast.makeText(RunActivity.this, "You have set the end point!", Toast.LENGTH_SHORT).show();
+                        Toast endPoint = Toast.makeText(RunActivity.this, "You have set the end point!", Toast.LENGTH_SHORT);
+                        endPoint.setGravity(Gravity.TOP|Gravity.CENTER, 0, 0);
+                        endPoint.show();
                         markerFinishOptions.title("End Point");
                         markerFinishOptions.position(endRunPosition);
                         //markerOptions.zIndex(0);
@@ -290,7 +320,9 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
                     drawedMap.clear();
 
                     markerFinishOptions = new MarkerOptions();
-                    Toast.makeText(RunActivity.this, "You have set the end point!", Toast.LENGTH_SHORT).show();
+                    Toast endPoint = Toast.makeText(RunActivity.this, "You have set the end point!", Toast.LENGTH_SHORT);
+                    endPoint.setGravity(Gravity.TOP|Gravity.CENTER, 0, 0);
+                    endPoint.show();
                     markerFinishOptions.title("End Point");
                     markerFinishOptions.position(endRunPosition);
                     //markerOptions.zIndex(0);
@@ -310,7 +342,9 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
                         travelMode = 1;
                     }
 
-                    Toast.makeText(RunActivity.this, "Calculating routes...", Toast.LENGTH_SHORT).show();
+                    Toast routeCalc = Toast.makeText(RunActivity.this, "Calculating routes...", Toast.LENGTH_SHORT);
+                    routeCalc.setGravity(Gravity.TOP|Gravity.CENTER, 0, 0);
+                    routeCalc.show();
                     Log.d("DEBUG","Start point position!!! 2" + startRunPosition.latitude + " / " + startRunPosition.longitude + "]");
 
                     calculateDirections(startRunPosition,endRunPosition,travelMode);
@@ -509,6 +543,7 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
                 builder.include(mPolylinesData.get(0).getPolyline().getPoints().get(lastIndex));
                 LatLngBounds bounds = builder.build();
 
+
                 drawedMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds,200));
             }
         });
@@ -517,7 +552,7 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
     public void onInfoWindowClick(final Marker marker) {
 
             final AlertDialog.Builder builder = new AlertDialog.Builder(RunActivity.this);
-            builder.setMessage("Are you at the start of the route?")
+            builder.setMessage("Open Google maps application to continue navigation?")
                     .setCancelable(true)
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
@@ -618,7 +653,18 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
                 polylineData.getPolyline().setColor(ContextCompat.getColor(RunActivity.this, R.color.blue));
                 polylineData.getPolyline().setZIndex(1);
                 int middleIndex = (polylineData.getPolyline().getPoints().size() - 1)/2;
+                int lastIndex = polylineData.getPolyline().getPoints().size() - 1;
 
+                mSmogParameters = new MySmogParameters();
+                mSmogParameters.routeIndex = index;
+
+                mSmogParameters.lastIndex = lastIndex;
+                for(int i = 0; i<lastIndex-1; i=i+10) {
+                    mSmogParameters.setLatitudeLongitude(polylineData.getPolyline().getPoints().get(i).latitude,polylineData.getPolyline().getPoints().get(i).longitude);
+
+
+                }
+                new AirlyInterpolateAsync().execute(mSmogParameters);
                 LatLng middleLocation = polylineData.getPolyline().getPoints().get(middleIndex);
 
                 if(infoRouteMarker != null) {
@@ -627,11 +673,14 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
                 infoRouteMarker = drawedMap.addMarker(new MarkerOptions().
                         position(middleLocation).
                         title("Trip number: " + index).
-                        snippet("Duration: "+polylineData.getLeg().duration + " Distance: " + polylineData.getLeg().distance));
+                        snippet("Duration: "+polylineData.getLeg().duration + " Distance: " + polylineData.getLeg().distance+"\n Press this message to start navigation..."));
 
                 drawedMap.setOnInfoWindowClickListener(this);
                 infoRouteMarker.showInfoWindow();
 
+                Toast toast = Toast.makeText(RunActivity.this,"Calculating smog route coefficients...",Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP|Gravity.CENTER, 0, 0);
+                toast.show();
 
 
             }
@@ -643,6 +692,143 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
             index++;
         }
 
+    }
+
+
+
+    public class AirlyInterpolateAsync extends AsyncTask<MySmogParameters,Void, MySmogParameters> {
+
+
+        TextView text;
+        String jsonStringResponse;
+        @Override
+        public MySmogParameters doInBackground(MySmogParameters...params) {
+            ArrayList pm1Array = new ArrayList();
+            ArrayList pm10Array = new ArrayList();
+            ArrayList pm25Array = new ArrayList();
+
+            for(int i = 0;i<params[0].length();i++) {
+                URL airlyEndpoint;
+                try {
+                    airlyEndpoint = new URL("https://airapi.airly.eu/v2/measurements/point?indexType=AIRLY_CAQI"
+                            + "&lat=" + params[0].getLatitude(i)
+                            + "&lng=" + params[0].getLLongitude(i));
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                }
+                // Create connection
+                HttpsURLConnection myConnection;
+
+                try {
+                    myConnection = (HttpsURLConnection) airlyEndpoint.openConnection();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                myConnection.setRequestProperty("Accept",
+                        "application/json");
+                myConnection.setRequestProperty("Accept-Language",
+                        "en");
+                myConnection.setRequestProperty("apikey",
+                        "smD7lvjAAYAmArkXDcACunq0p0OldmTT");
+                StringBuffer response = new StringBuffer();
+                ;
+                try {
+                    if (myConnection.getResponseCode() == 200) {
+
+                        Log.i("happy", "CONNECTION SUCCESS!");
+                        BufferedReader in = new BufferedReader(new InputStreamReader(myConnection.getInputStream()));
+                        String inputLine;
+
+                        while ((inputLine = in.readLine()) != null) {
+                            response.append(inputLine);
+                        }
+
+
+                        Log.i("Stream data", response.toString());
+                        in.close();
+
+                    }
+                    // Success
+                    // Further processing here
+                    else {
+                        // Error handling code goes here
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                try {
+                    //JSONObject rootObject = new JSONObject(response.toString());
+
+                    JSONObject object = new JSONObject(response.toString());
+
+                    JSONObject address = object.getJSONObject("current");
+                    JSONArray values = address.getJSONArray("values");
+                    if(!values.isNull(0)) {
+                    JSONArray indexes = address.getJSONArray("indexes");
+
+                    JSONObject CAQIindex = indexes.getJSONObject(0);
+                    ArrayList<String> measurementValues = new ArrayList<>();
+
+                    for (int j = 0; j < values.length(); j++) {
+                        JSONObject readValue = values.getJSONObject(j);
+                        measurementValues.add(j, readValue.getString("value"));
+
+                    }
+
+                        params[0].pm1 = measurementValues.get(0);
+                        params[0].pm25 = measurementValues.get(1);
+                        params[0].pm10 = measurementValues.get(2);
+                        params[0].temperature = measurementValues.get(5);
+
+//                for (int i = 0; i<CAQIindex.length();i++){
+//                    JSONObject readValue = CAQIindex.getJSONObject(i);
+//                    measurementValues.add(i,readValue.getString("value"));
+//                }
+                        params[0].indexName = CAQIindex.getString("name");
+                        params[0].indexValue = CAQIindex.getString("value");
+                        params[0].indexLevel = CAQIindex.getString("level");
+                        params[0].indexDescription = CAQIindex.getString("description");
+                        params[0].indexAdvice = CAQIindex.getString("advice");
+                        params[0].indexColor = CAQIindex.getString("color");
+
+
+                    //mPolylinesData.get(params[0].routeIndex).setPm1(Double.parseDouble(params[0].pm1));
+                    //mPolylinesData.get(params[0].routeIndex).setPm10(Double.parseDouble(params[0].pm10));
+                    //mPolylinesData.get(params[0].routeIndex).setPm25(Double.parseDouble(params[0].pm25));
+                    pm1Array.add(Double.parseDouble(measurementValues.get(0)));
+                    pm10Array.add(Double.parseDouble(measurementValues.get(2)));
+                    pm25Array.add(Double.parseDouble(measurementValues.get(1)));
+                    }
+//                Log.i("street",address.getString("street"));
+//                Log.i("number",address.getString("number"));
+//                Log.i("displayAddress1",address.getString("displayAddress1"));
+//                Log.i("displayAddress2",address.getString("displayAddress2"));
+
+
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+            params[0].mediumPm1 = params[0].calculateMediumPm(pm1Array);
+            params[0].mediumPm10 = params[0].calculateMediumPm(pm10Array);
+            params[0].mediumPm25 = params[0].calculateMediumPm(pm25Array);
+            return params[0];
+        }
+
+        @Override
+        protected void onPostExecute(MySmogParameters params) {
+            DecimalFormat format = new DecimalFormat("##.00");
+
+            pm1RouteValue.setText(String.valueOf(format.format(params.mediumPm1)));
+            pm1RouteValue.setTextColor(Color.parseColor(params.indexColor));
+
+            pm10RouteValue.setText(String.valueOf(format.format(params.mediumPm10)));
+            pm10RouteValue.setTextColor(Color.parseColor(params.indexColor));
+
+            pm25RouteValue.setText(String.valueOf(format.format(params.mediumPm25)));
+            pm25RouteValue.setTextColor(Color.parseColor(params.indexColor));
+        }
     }
 }
 

@@ -11,7 +11,11 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -24,6 +28,19 @@
                 android:layout_height="match_parent"
 
                 app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageButton
+                android:id="@+id/refreshButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:layout_alignStart="@+id/user_map"
+                android:layout_alignTop="@+id/user_map"
+
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="40dp"
+                android:layout_marginBottom="0dp"
+                app:srcCompat="@drawable/ic_refresh" />
         </RelativeLayout>
 
 
@@ -31,9 +48,9 @@
             android:id="@+id/walkOrRunLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="5"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_weight="5"
             app:layout_constraintStart_toStartOf="parent">
 
 
@@ -50,7 +67,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
 
-                android:text="Choose type of Activity:" />
+                android:text="Choose Activity:" />
 
             <android.support.v7.widget.SwitchCompat
                 android:id="@+id/switch1"
@@ -60,7 +77,7 @@
 
                 android:layout_alignParentStart="true"
                 android:layout_alignParentBottom="true"
-                android:layout_marginStart="55dp"
+                android:layout_marginStart="30dp"
                 android:layout_marginTop="14dp"
                 android:layout_marginBottom="53dp"
 
@@ -74,7 +91,7 @@
 
                 android:layout_alignParentStart="true"
                 android:layout_alignParentBottom="true"
-                android:layout_marginStart="30dp"
+                android:layout_marginStart="6dp"
                 android:layout_marginBottom="1dp"
                 android:text="GO!" />
 
@@ -85,7 +102,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true"
                 android:layout_marginTop="13dp"
-                android:layout_marginEnd="70dp"
+                android:layout_marginEnd="20dp"
                 android:text="Start" />
 
             <Button
@@ -94,39 +111,127 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentBottom="true"
-                android:layout_marginEnd="70dp"
+                android:layout_marginEnd="20dp"
                 android:layout_marginBottom="0dp"
                 android:text="End" />
+
+
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/GoButton"
+                android:layout_marginStart="3dp"
+                android:layout_marginBottom="7dp"
+                android:layout_toEndOf="@+id/switch1"
+                app:srcCompat="@drawable/ic_bicycle" />
+
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginStart="3dp"
+                android:layout_marginBottom="48dp"
+
+                app:srcCompat="@drawable/ic_running_solid" />
 
             <TextView
                 android:id="@+id/textView3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
+
                 android:layout_alignParentTop="true"
-                android:layout_marginStart="100dp"
-                android:layout_marginTop="40dp"
-                android:text="Cycle" />
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="5dp"
+                android:text="Route smog measurements:" />
 
             <TextView
                 android:id="@+id/textView5"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:layout_marginStart="22dp"
-                android:layout_marginTop="40dp"
-                android:text="Run" />
+                android:layout_below="@+id/textView3"
+                android:layout_alignStart="@+id/textView3"
+                android:layout_alignBottom="@+id/startPoint"
+                android:layout_marginTop="10dp"
+                android:text="PM 1: " />
 
-            <ImageButton
-                android:id="@+id/refreshButton"
+            <TextView
+                android:id="@+id/textView6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/textView5"
                 android:layout_alignBottom="@+id/startPoint"
-                android:layout_marginStart="350dp"
+                android:layout_marginStart="23dp"
+                android:layout_marginTop="0dp"
+
                 android:layout_marginBottom="0dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:srcCompat="@drawable/ic_refresh" />
+                android:layout_toEndOf="@+id/textView5"
+                android:text="PM 10:" />
+
+            <TextView
+                android:id="@+id/textView7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/textView5"
+                android:layout_alignBottom="@+id/startPoint"
+                android:layout_marginStart="30dp"
+                android:layout_marginTop="0dp"
+
+                android:layout_marginBottom="0dp"
+                android:layout_toEndOf="@+id/textView6"
+                android:text="PM 2.5:" />
+
+            <TextView
+                android:id="@+id/pm1RouteValue"
+                android:layout_width="49dp"
+                android:layout_height="27dp"
+
+                android:layout_below="@+id/textView5"
+                android:layout_alignStart="@+id/textView5"
+                android:layout_marginStart="0dp"
+                android:layout_marginTop="11dp"
+                android:ems="10"
+                android:inputType="number"
+                android:selectAllOnFocus="false"
+
+                android:textAlignment="center"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/pm10RouteValue"
+                android:layout_width="49dp"
+                android:layout_height="27dp"
+
+                android:layout_below="@+id/textView5"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="10dp"
+                android:layout_toEndOf="@+id/pm1RouteValue"
+                android:ems="10"
+                android:inputType="number"
+
+                android:selectAllOnFocus="false"
+                android:textAlignment="center"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/pm25RouteValue"
+                android:layout_width="49dp"
+                android:layout_height="27dp"
+                android:layout_below="@+id/textView5"
+                android:layout_marginStart="14dp"
+                android:layout_marginTop="11dp"
+                android:layout_toEndOf="@+id/pm10RouteValue"
+                android:ems="10"
+                android:inputType="number"
+                android:selectAllOnFocus="false"
+
+
+                android:textAlignment="center"
+                android:textSize="20sp" />
+
         </RelativeLayout>
     </LinearLayout>
 
