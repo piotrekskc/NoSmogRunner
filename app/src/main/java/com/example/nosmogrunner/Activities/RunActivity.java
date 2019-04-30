@@ -19,6 +19,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -107,6 +108,10 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
     public TextView pm10RouteValue;
     public TextView pm25RouteValue;
 
+    public ProgressBar pm1Progress;
+    public ProgressBar pm25Progress;
+    public ProgressBar pm10Progress;
+    public RelativeLayout smogStatsLayout;
 
 
     @Override
@@ -131,13 +136,17 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
         if (savedInstanceState != null) {
             mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
         }
-
+        smogStatsLayout = findViewById(R.id.statsLayout);
+        smogStatsLayout.setVisibility(View.INVISIBLE);
         mMapView.onCreate(mapViewBundle);
         mMapView.getMapAsync(this);
         walkOrRunLayout = findViewById(R.id.walkOrRunLayout);
         pm1RouteValue = findViewById(R.id.pm1RouteValue);
         pm10RouteValue = findViewById(R.id.pm10RouteValue);
         pm25RouteValue = findViewById(R.id.pm25RouteValue);
+        pm1Progress = findViewById(R.id.PM1RunProgressBar);
+        pm25Progress= findViewById(R.id.PM25RunProgressBar);
+        pm10Progress= findViewById(R.id.PM10RunProgressBar);
 
     }
 
@@ -819,6 +828,22 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
         @Override
         protected void onPostExecute(MySmogParameters params) {
             DecimalFormat format = new DecimalFormat("##.00");
+
+            smogStatsLayout.animate();
+            smogStatsLayout.setVisibility(View.VISIBLE);
+
+
+            int percentPm1 = (int)((params.mediumPm1 / 25) *100);
+            int percentPm10 = (int)((params.mediumPm10 / 50)*100);
+            int percentPm25 = (int)((params.mediumPm25 / 25)*100);
+
+
+            pm1Progress.setProgress(percentPm1);
+
+
+            pm10Progress.setProgress(percentPm10);
+            pm25Progress.setProgress(percentPm25);
+
 
             pm1RouteValue.setText(String.valueOf(format.format(params.mediumPm1)));
             pm1RouteValue.setTextColor(Color.parseColor(params.indexColor));

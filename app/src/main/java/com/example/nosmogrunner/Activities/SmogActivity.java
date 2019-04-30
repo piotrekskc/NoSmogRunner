@@ -200,7 +200,7 @@ public class SmogActivity extends MainMenuActivity {
             text.setText(params.pm25);
             text.setTextColor(Color.parseColor(params.indexColor));
 
-            //PM10 max 50 PM25 25 Pm1 60
+//            //PM10 max 50 PM25 25 Pm1 60
             ProgressBar progressBar10 = (ProgressBar) findViewById(R.id.PM10progressBar);
             ProgressBar progressBar1 = (ProgressBar) findViewById(R.id.PM1progressBar);
             ProgressBar progressBar25 = (ProgressBar) findViewById(R.id.PM25progressBar);
