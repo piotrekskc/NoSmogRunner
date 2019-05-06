@@ -19,7 +19,9 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.example.nosmogrunner.AirlyCityGet;
 import com.example.nosmogrunner.R;
+import com.example.nosmogrunner.models.CitySmogParameters;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -51,7 +53,12 @@ public class MainMenuActivity extends WelcomeActivity {
         ImageButton runB = (ImageButton) findViewById(R.id.runButton);
         ImageButton chartB = (ImageButton) findViewById(R.id.statsButton);
         ImageButton smogB = (ImageButton) findViewById(R.id.smogButton);
-
+        CitySmogParameters myCityParams = new CitySmogParameters();
+        myCityParams.cityCenterLat = 52.22993199999999;
+        myCityParams.cityCenterLng = 21.05650100000002;
+        myCityParams.cityRadius = 40;
+        AirlyCityGet cityGetter = new AirlyCityGet();
+        cityGetter.execute(myCityParams);
 
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -78,7 +85,9 @@ public class MainMenuActivity extends WelcomeActivity {
             @Override
             public void onClick(View view) {
                 //Toast.makeText(MainMenuActivity.this, "Run Nav",Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(MainMenuActivity.this, RunActivity.class));
+                Intent i = new Intent(MainMenuActivity.this, RunActivity.class);
+                i.putExtra("citySmogParameter", myCityParams);
+                startActivity(i);
 
             }
         });

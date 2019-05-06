@@ -12,6 +12,18 @@
         <item name="colorSwitchThumbNormal">@color/black</item>
         <item name="android:colorForeground">@color/colorPrimary</item>
     </style>
+    <style name="exampleToast">
+        <item name="colorBackground">#50B5F1</item>
+        <item name="textColor">#000</item>
+
+        <item name="strokeColor">#000</item>
+        <item name="strokeWidth">3dp</item>
+        <item name="length">LONG</item>
+        <item name="cornerRadius">10dp</item>
+
+
+
+    </style>
 
 
 </resources>

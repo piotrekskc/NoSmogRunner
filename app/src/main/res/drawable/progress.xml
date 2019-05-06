@@ -4,17 +4,19 @@
     android:innerRadiusRatio="3"
     android:thicknessRatio="8"
     android:useLevel="true"
+
     >
 
     <size
         android:width="76dip"
         android:height="76dip" />
 
-    <solid android:color="@color/green"/>
+
     <gradient
-    android:endColor="@color/green"
-    android:startColor="@color/colorAccent"
-    android:angle="0"
+
+    android:startColor="@color/bright_green"
+    android:endColor="@color/bright_red"
+    android:angle="180"
     />
 
 </shape>

@@ -3,10 +3,13 @@ package com.example.nosmogrunner.Activities;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,15 +19,20 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.nosmogrunner.R;
+import com.example.nosmogrunner.models.CitySmogParameters;
+import com.example.nosmogrunner.models.CustomInfoWindowAdapter;
 import com.example.nosmogrunner.models.MySmogParameters;
 import com.example.nosmogrunner.models.PolylineData;
 import com.example.nosmogrunner.models.UserLocation;
@@ -102,31 +110,54 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
     private Marker infoRouteMarker;
     private ImageButton refreshButton;
     private int travelMode = 0;
-    public MySmogParameters mSmogParameters;
+    //public MySmogParameters mSmogParameters;
+    public ArrayList<MySmogParameters> mSmogParameters;
 
     public TextView pm1RouteValue;
     public TextView pm10RouteValue;
     public TextView pm25RouteValue;
+    public TextView caqiLevel;
+    public TextView cleanestRouteText;
+
 
     public ProgressBar pm1Progress;
     public ProgressBar pm25Progress;
     public ProgressBar pm10Progress;
     public RelativeLayout smogStatsLayout;
+    public RelativeLayout smogComparisonLayout;
 
+    public ProgressBar loadingCircle;
+
+    public ImageView cleanestRouteImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Intent i = getIntent();
+        CitySmogParameters myCityParams = (CitySmogParameters)i.getSerializableExtra("citySmogParameter");
+        //JSONArray currentArray = myCityParams.getCityJson();
         setContentView(R.layout.run);
         getSupportActionBar().hide();
 
+
+        loadingCircle = findViewById(R.id.circularProgress);
+        loadingCircle.setVisibility(View.INVISIBLE);
+
         mMapView = findViewById(R.id.user_map);
+
+
+
+
+
         refreshButton = findViewById(R.id.refreshButton);
         refreshButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(drawedMap != null) {
                     drawedMap.clear();
+                    smogStatsLayout.setVisibility(View.INVISIBLE);
+
                 }
             }
         });
@@ -147,6 +178,11 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
         pm1Progress = findViewById(R.id.PM1RunProgressBar);
         pm25Progress= findViewById(R.id.PM25RunProgressBar);
         pm10Progress= findViewById(R.id.PM10RunProgressBar);
+        cleanestRouteImage = findViewById(R.id.cleanestRouteImage);
+        cleanestRouteText = findViewById(R.id.cleanestRouteText);
+        cleanestRouteImage.setVisibility(View.INVISIBLE);
+        cleanestRouteText.setVisibility(View.INVISIBLE);
+
 
     }
 
@@ -272,9 +308,22 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
 
                         markerStartOptions.position(startRunPosition);
                         drawedMap.addMarker(markerStartOptions);
-                        Toast startPoint=Toast.makeText(RunActivity.this,"You have set the start point!",Toast.LENGTH_SHORT);
-                        startPoint.setGravity(Gravity.TOP|Gravity.CENTER, 0, 0);
-                        startPoint.show();
+//                        LayoutInflater inflater = getLayoutInflater();
+//                        View layout = inflater.inflate(R.layout.activity_toast_default_view,
+//                                (ViewGroup) findViewById(R.id.toast_layout_root));
+//
+//
+//                        TextView text = (TextView) layout.findViewById(R.id.text);
+//                        text.setText("You have set the start point!");
+//
+//                        Toast toast = new Toast(getApplicationContext());
+//                        toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
+//                        toast.setDuration(Toast.LENGTH_LONG);
+//                        toast.setView(layout);
+//                        toast.show();
+
+                        showCustomToast("You have set the start point!");
+
                         if( endRunPosition != null){
                             markerFinishOptions = new MarkerOptions();
                             markerFinishOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
@@ -291,9 +340,26 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
                         drawedMap.clear();
                         endRunPosition = new LatLng(point.latitude, point.longitude);
                         markerFinishOptions = new MarkerOptions();
-                        Toast endPoint = Toast.makeText(RunActivity.this, "You have set the end point!", Toast.LENGTH_SHORT);
-                        endPoint.setGravity(Gravity.TOP|Gravity.CENTER, 0, 0);
-                        endPoint.show();
+                        //View toastView = getLayoutInflater().inflate(R.layout.activity_toast_default_view, null);
+
+
+                        //Toast endPoint = Toast.makeText(RunActivity.this, "You have set the end point!",Toast.LENGTH_SHORT);
+//                        LayoutInflater inflater = getLayoutInflater();
+//                        View layout = inflater.inflate(R.layout.activity_toast_default_view,
+//                                (ViewGroup) findViewById(R.id.toast_layout_root));
+//
+//
+//                        TextView text = (TextView) layout.findViewById(R.id.text);
+//                        text.setText("You have set the end point!");
+//
+//                        Toast toast = new Toast(getApplicationContext());
+//                        toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
+//                        toast.setDuration(Toast.LENGTH_LONG);
+//                        toast.setView(layout);
+//                        toast.show();
+
+                        showCustomToast("You have set the end point!");
+
                         markerFinishOptions.title("End Point");
                         markerFinishOptions.position(endRunPosition);
                         //markerOptions.zIndex(0);
@@ -324,19 +390,32 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
         goButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (startRunPosition != null && endRunPosition != null) {
+                if (connected()) {
+                    if (startRunPosition != null && endRunPosition != null) {
 
-                    drawedMap.clear();
+                        drawedMap.clear();
 
-                    markerFinishOptions = new MarkerOptions();
-                    Toast endPoint = Toast.makeText(RunActivity.this, "You have set the end point!", Toast.LENGTH_SHORT);
-                    endPoint.setGravity(Gravity.TOP|Gravity.CENTER, 0, 0);
-                    endPoint.show();
-                    markerFinishOptions.title("End Point");
-                    markerFinishOptions.position(endRunPosition);
-                    //markerOptions.zIndex(0);
-                    markerFinishOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-                    drawedMap.addMarker(markerFinishOptions);
+                        markerFinishOptions = new MarkerOptions();
+//                        LayoutInflater inflater = getLayoutInflater();
+//                        View layout = inflater.inflate(R.layout.activity_toast_default_view,
+//                                (ViewGroup) findViewById(R.id.toast_layout_root));
+//
+//
+//                        TextView text = (TextView) layout.findViewById(R.id.text);
+//                        text.setText("You have set the end point!");
+//
+//                        Toast toast = new Toast(getApplicationContext());
+//                        toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
+//                        toast.setDuration(Toast.LENGTH_LONG);
+//                        toast.setView(layout);
+//                        toast.show();
+                        showCustomToast("You have set the end point!");
+
+                        markerFinishOptions.title("End Point");
+                        markerFinishOptions.position(endRunPosition);
+                        //markerOptions.zIndex(0);
+                        markerFinishOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                        drawedMap.addMarker(markerFinishOptions);
 
                         markerStartOptions = new MarkerOptions();
                         markerStartOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
@@ -345,33 +424,74 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
                         drawedMap.addMarker(markerStartOptions);
 
 
-                    android.support.v7.widget.SwitchCompat s = (android.support.v7.widget.SwitchCompat) findViewById(R.id.switch1);
-                    if (s.isChecked())
-                    {
-                        travelMode = 1;
+                        android.support.v7.widget.SwitchCompat s = (android.support.v7.widget.SwitchCompat) findViewById(R.id.switch1);
+                        if (s.isChecked()) {
+                            travelMode = 1;
+                        }
+
+//                        LayoutInflater inflater2 = getLayoutInflater();
+//                        View layout2 = inflater2.inflate(R.layout.activity_toast_default_view,
+//                                (ViewGroup) findViewById(R.id.toast_layout_root));
+//
+//
+//                        TextView text2 = (TextView) layout2.findViewById(R.id.text);
+//                        text2.setText("Calculating routes...");
+//
+//                        Toast toast2 = new Toast(getApplicationContext());
+//                        toast2.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
+//                        toast2.setDuration(Toast.LENGTH_LONG);
+//                        toast2.setView(layout2);
+//                        toast2.show();
+                        showCustomToast("Calculating routes...");
+                        Log.d("DEBUG", "Start point position!!! 2" + startRunPosition.latitude + " / " + startRunPosition.longitude + "]");
+
+                        calculateDirections(startRunPosition, endRunPosition, travelMode);
+                    } else if (startRunPosition == null) {
+//                        LayoutInflater inflater2 = getLayoutInflater();
+//                        View layout2 = inflater2.inflate(R.layout.activity_toast_default_view,
+//                                (ViewGroup) findViewById(R.id.toast_layout_root));
+//
+//
+//                        TextView text2 = (TextView) layout2.findViewById(R.id.text);
+//                        text2.setText("Please choose your start point");
+//
+//                        Toast toast2 = new Toast(getApplicationContext());
+//                        toast2.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
+//                        toast2.setDuration(Toast.LENGTH_LONG);
+//                        toast2.setView(layout2);
+//                        toast2.show();
+                        showCustomToast("Please choose your start point");
+
+                    } else if (endRunPosition == null) {
+//                         Toast ToastMessage = Toast.makeText(RunActivity.this, "Please choose your finish point", Toast.LENGTH_SHORT);
+//                        ToastMessage.setGravity(Gravity.CENTER | Gravity.CENTER, 0, 0);
+//                        View toastView = ToastMessage.getView();
+                        showCustomToast("Please choose your finish point");
+
+
                     }
-
-                    Toast routeCalc = Toast.makeText(RunActivity.this, "Calculating routes...", Toast.LENGTH_SHORT);
-                    routeCalc.setGravity(Gravity.TOP|Gravity.CENTER, 0, 0);
-                    routeCalc.show();
-                    Log.d("DEBUG","Start point position!!! 2" + startRunPosition.latitude + " / " + startRunPosition.longitude + "]");
-
-                    calculateDirections(startRunPosition,endRunPosition,travelMode);
                 }
-                else if(startRunPosition == null)
-                {
-                    Toast.makeText(RunActivity.this, "Please choose your start point", Toast.LENGTH_SHORT).show();
-
+                else{
+//                    Toast ToastMessage = Toast.makeText(RunActivity.this, "Please check your internet connection", Toast.LENGTH_LONG);
+//                    ToastMessage.setGravity(Gravity.CENTER | Gravity.CENTER, 0, 0);
+//                    ToastMessage.show();
+                    showCustomToast("Please check your internet connection");
                 }
-                else if(endRunPosition == null)
-                {
-                    Toast.makeText(RunActivity.this, "Please choose your finish point", Toast.LENGTH_SHORT).show();
 
-                }
             }
+
+
+
         });
     }
 
+
+
+    private boolean connected(){
+        ConnectivityManager connectivityManager=(ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo !=null && activeNetworkInfo.isConnected();
+    }
 
 
 
@@ -387,9 +507,13 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
         }, LOCATION_UPDATE_INTERVAL);
     }
 
+
+
     private void stopLocationUpdates() {
         mHandler.removeCallbacks(mRunnable);
     }
+
+
 
     private void retrieveUserLocations() {
         UserLocation updatedUserLocation = getUserLocationObject();
@@ -399,6 +523,8 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
                     updatedUserLocation.getUserLongitude()
             );
     }
+
+
 
     private void startLocationService(){
         if(!isLocationServiceRunning()){
@@ -414,6 +540,9 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
         }
     }
 
+
+
+
     private boolean isLocationServiceRunning() {
         ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)){
@@ -425,6 +554,10 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
         Log.d(TAG, "isLocationServiceRunning: location service is not running.");
         return false;
     }
+
+
+
+
     private void initGoogleMap(Bundle savedInstanceState) {
         // *** IMPORTANT ***
         // MapView requires that the Bundle you pass contain _ONLY_ MapView SDK
@@ -437,6 +570,8 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
 
         mMapView.getMapAsync(this);
     }
+
+
 
     @Override
     public void onPause() {
@@ -455,6 +590,9 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
         super.onLowMemory();
         mMapView.onLowMemory();
     }
+
+
+
 
     private void calculateDirections(LatLng startRunPosition,LatLng endRunPosition, int travelMode){
         Log.d(TAG, "calculateDirections: calculating directions.");
@@ -509,13 +647,15 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
 
 
 
+
+
     private void addPolylinesToMap(final DirectionsResult result){
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
                 Log.d(TAG, "run: result routes: " + result.routes.length);
-                if(mPolylinesData.size()>0){
-                    for(PolylineData polylineData: mPolylinesData){
+                if (mPolylinesData.size() > 0) {
+                    for (PolylineData polylineData : mPolylinesData) {
                         polylineData.getPolyline().remove();
 
                     }
@@ -525,14 +665,14 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
                 }
 
 
-                for(DirectionsRoute route: result.routes){
+                for (DirectionsRoute route : result.routes) {
                     Log.d(TAG, "run: leg: " + route.legs[0].toString());
                     List<com.google.maps.model.LatLng> decodedPath = PolylineEncoding.decode(route.overviewPolyline.getEncodedPath());
 
                     List<LatLng> newDecodedPath = new ArrayList<>();
 
                     // This loops through all the LatLng coordinates of ONE polyline.
-                    for(com.google.maps.model.LatLng latLng: decodedPath){
+                    for (com.google.maps.model.LatLng latLng : decodedPath) {
 
                         // Log.d(TAG, "run: latlng: " + latLng.toString());
                         newDecodedPath.add(new LatLng(
@@ -544,19 +684,56 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
                     polyline.setColor(ContextCompat.getColor(RunActivity.this, R.color.gray));
                     polyline.setClickable(true);
 
-                    mPolylinesData.add(new PolylineData(polyline,route.legs[0]));
+                    mPolylinesData.add(new PolylineData(polyline, route.legs[0]));
                 }
+                mSmogParameters = new ArrayList<>();
+                int index = 0;
+
+
+                MySmogParameters params;
+                for (PolylineData polylineData : mPolylinesData) {
+
+                    int middleIndex = (polylineData.getPolyline().getPoints().size() - 1) / 2;
+                    int lastIndex = polylineData.getPolyline().getPoints().size() - 1;
+                    params = new MySmogParameters();
+                    mSmogParameters.add(params);
+                    mSmogParameters.get(index).routeIndex = index;
+                    mSmogParameters.get(index).lastIndex = lastIndex;
+
+                    mSmogParameters.get(index).setLatitudeLongitude(polylineData.getPolyline().getPoints().get(1 * lastIndex / 6).latitude, polylineData.getPolyline().getPoints().get(1 * lastIndex / 6).longitude);
+                    mSmogParameters.get(index).setLatitudeLongitude(polylineData.getPolyline().getPoints().get(2 * lastIndex / 6).latitude, polylineData.getPolyline().getPoints().get(2 * lastIndex / 6).longitude);
+                    mSmogParameters.get(index).setLatitudeLongitude(polylineData.getPolyline().getPoints().get(3 * lastIndex / 6).latitude, polylineData.getPolyline().getPoints().get(3 * lastIndex / 6).longitude);
+                    mSmogParameters.get(index).setLatitudeLongitude(polylineData.getPolyline().getPoints().get(4 * lastIndex / 6).latitude, polylineData.getPolyline().getPoints().get(4 * lastIndex / 6).longitude);
+                    mSmogParameters.get(index).setLatitudeLongitude(polylineData.getPolyline().getPoints().get(5 * lastIndex / 6).latitude, polylineData.getPolyline().getPoints().get(5 * lastIndex / 6).longitude);
+
+                    AirlyInterpolateAsync myTask = new AirlyInterpolateAsync();
+                    myTask.execute(mSmogParameters.get(index));
+
+
+
+                    index++;
+                }
+
+                mSmogParameters.get(0).numberOfRoutes = index - 1;
                 LatLngBounds.Builder builder = new LatLngBounds.Builder();
                 builder.include(mPolylinesData.get(0).getPolyline().getPoints().get(0));
-                int lastIndex = mPolylinesData.get(0).getPolyline().getPoints().size()-1 ;
+                int lastIndex = mPolylinesData.get(0).getPolyline().getPoints().size() - 1;
                 builder.include(mPolylinesData.get(0).getPolyline().getPoints().get(lastIndex));
                 LatLngBounds bounds = builder.build();
 
 
-                drawedMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds,200));
+                drawedMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 200));
+
+
             }
         });
+
+
     }
+
+
+
+
     @Override
     public void onInfoWindowClick(final Marker marker) {
 
@@ -655,58 +832,118 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
 
 
         int index = 0;
-        for(PolylineData polylineData: mPolylinesData){
-
-            Log.d(TAG, "onPolylineClick: toString: " + polylineData.toString());
-            if(polyline.getId().equals(polylineData.getPolyline().getId())){
-                polylineData.getPolyline().setColor(ContextCompat.getColor(RunActivity.this, R.color.blue));
-                polylineData.getPolyline().setZIndex(1);
-                int middleIndex = (polylineData.getPolyline().getPoints().size() - 1)/2;
-                int lastIndex = polylineData.getPolyline().getPoints().size() - 1;
-
-                mSmogParameters = new MySmogParameters();
-                mSmogParameters.routeIndex = index;
-
-                mSmogParameters.lastIndex = lastIndex;
-                for(int i = 0; i<lastIndex-1; i=i+10) {
-                    mSmogParameters.setLatitudeLongitude(polylineData.getPolyline().getPoints().get(i).latitude,polylineData.getPolyline().getPoints().get(i).longitude);
+        for (PolylineData polylineData : mPolylinesData) {
+            if (mSmogParameters.get(index).responseCode == 200) {
+                Log.d(TAG, "onPolylineClick: toString: " + polylineData.toString());
+                if (polyline.getId().equals(polylineData.getPolyline().getId())) {
 
 
+                        cleanestRouteText.setVisibility(View.INVISIBLE);
+                        cleanestRouteImage.setVisibility(View.INVISIBLE);
+
+
+
+                    polylineData.getPolyline().setColor(ContextCompat.getColor(RunActivity.this, R.color.blue));
+                    polylineData.getPolyline().setZIndex(1);
+                    int middleIndex = (polylineData.getPolyline().getPoints().size() - 1) / 2;
+
+                    drawedMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(RunActivity.this));
+
+                    LatLng middleLocation = polylineData.getPolyline().getPoints().get(middleIndex);
+
+                    if (infoRouteMarker != null) {
+                        infoRouteMarker.remove();
+                    }
+                    infoRouteMarker = drawedMap.addMarker(new MarkerOptions().
+                            position(middleLocation).
+                            title("Trip number: " + index).
+                            snippet("Duration:  " + polylineData.getLeg().duration + "\n Distance:  " + polylineData.getLeg().distance + "\n Press this message to start navigation..."));
+
+                    drawedMap.setOnInfoWindowClickListener(this);
+
+                    infoRouteMarker.showInfoWindow();
+//
+//                Toast toast = Toast.makeText(RunActivity.this,"Calculating smog route coefficients...",Toast.LENGTH_SHORT);
+//                toast.setGravity(Gravity.CENTER|Gravity.CENTER, 0, 0);
+//                toast.show();
+
+                    DecimalFormat format = new DecimalFormat("##.00");
+
+
+                    int percentPm1 = (int) ((mSmogParameters.get(index).mediumPm1 / 25) * 100);
+                    int percentPm10 = (int) ((mSmogParameters.get(index).mediumPm10 / 50) * 100);
+                    int percentPm25 = (int) ((mSmogParameters.get(index).mediumPm25 / 25) * 100);
+
+
+                    pm1Progress.setProgress(percentPm1);
+
+
+                    pm10Progress.setProgress(percentPm10);
+                    pm25Progress.setProgress(percentPm25);
+
+                    double mediumPmCurrent = (mSmogParameters.get(index).mediumPm1 + mSmogParameters.get(index).mediumPm10 + mSmogParameters.get(index).mediumPm25)/3;
+
+                    double lowestMediumPM = 1000;
+                    for(int i =0; i<mSmogParameters.get(0).numberOfRoutes; i++ ){
+
+
+                         double   mediumPm = (mSmogParameters.get(i).mediumPm1 + mSmogParameters.get(i).mediumPm10 + mSmogParameters.get(i).mediumPm25) / 3;
+
+                        if(lowestMediumPM > mediumPm){
+                            lowestMediumPM = mediumPm;
+                        }
+                    }
+
+
+                    if(lowestMediumPM == mediumPmCurrent) {
+                        cleanestRouteText.setVisibility(View.VISIBLE);
+                        cleanestRouteImage.setVisibility(View.VISIBLE);
+                    }
+
+//                if(mSmogParameters.get(index).indexColor == null)
+//                {
+//                    mSmogParameters.get(index).indexColor = "#000";
+//                }
+                    pm1RouteValue.setText(String.valueOf(format.format(mSmogParameters.get(index).mediumPm1)));
+                    pm1RouteValue.setTextColor(Color.parseColor(mSmogParameters.get(index).indexColor));
+
+                    pm10RouteValue.setText(String.valueOf(format.format(mSmogParameters.get(index).mediumPm10)));
+                    pm10RouteValue.setTextColor(Color.parseColor(mSmogParameters.get(index).indexColor));
+
+                    pm25RouteValue.setText(String.valueOf(format.format(mSmogParameters.get(index).mediumPm25)));
+                    pm25RouteValue.setTextColor(Color.parseColor(mSmogParameters.get(index).indexColor));
+
+                    smogStatsLayout.animate();
+                    smogStatsLayout.setVisibility(View.VISIBLE);
+
+
+
+                } else {
+                    polylineData.getPolyline().setColor(ContextCompat.getColor(RunActivity.this, R.color.gray));
+                    polylineData.getPolyline().setZIndex(0);
                 }
-                new AirlyInterpolateAsync().execute(mSmogParameters);
-                LatLng middleLocation = polylineData.getPolyline().getPoints().get(middleIndex);
 
-                if(infoRouteMarker != null) {
-                    infoRouteMarker.remove();
-                }
-                infoRouteMarker = drawedMap.addMarker(new MarkerOptions().
-                        position(middleLocation).
-                        title("Trip number: " + index).
-                        snippet("Duration: "+polylineData.getLeg().duration + " Distance: " + polylineData.getLeg().distance+"\n Press this message to start navigation..."));
-
-                drawedMap.setOnInfoWindowClickListener(this);
-                infoRouteMarker.showInfoWindow();
-
-                Toast toast = Toast.makeText(RunActivity.this,"Calculating smog route coefficients...",Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP|Gravity.CENTER, 0, 0);
-                toast.show();
+                index++;
 
 
             }
-            else{
-                polylineData.getPolyline().setColor(ContextCompat.getColor(RunActivity.this, R.color.gray));
-                polylineData.getPolyline().setZIndex(0);
-            }
 
-            index++;
+
+
+
         }
-
     }
 
 
 
     public class AirlyInterpolateAsync extends AsyncTask<MySmogParameters,Void, MySmogParameters> {
 
+        MySmogParameters passedParameter = new MySmogParameters();
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            loadingCircle.setVisibility(View.VISIBLE);
+        }
 
         TextView text;
         String jsonStringResponse;
@@ -715,145 +952,241 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
             ArrayList pm1Array = new ArrayList();
             ArrayList pm10Array = new ArrayList();
             ArrayList pm25Array = new ArrayList();
+            ArrayList CAQIArray = new ArrayList();
 
-            for(int i = 0;i<params[0].length();i++) {
-                URL airlyEndpoint;
-                try {
-                    airlyEndpoint = new URL("https://airapi.airly.eu/v2/measurements/point?indexType=AIRLY_CAQI"
-                            + "&lat=" + params[0].getLatitude(i)
-                            + "&lng=" + params[0].getLLongitude(i));
-                } catch (MalformedURLException e) {
-                    throw new RuntimeException(e);
-                }
-                // Create connection
-                HttpsURLConnection myConnection;
+    ArrayList pm1HistoryArray = new ArrayList();
+                ArrayList pm10HistoryArray = new ArrayList();
+                ArrayList pm25HistoryArray = new ArrayList();
+                int index = params[0].routeIndex;
+                for (int i = 0; i < params[0].length(); i++) {
+                    URL airlyEndpoint;
+                    try {
+                        airlyEndpoint = new URL("https://airapi.airly.eu/v2/measurements/point?indexType=AIRLY_CAQI"
+                                + "&lat=" + params[0].getLatitude(i)
+                                + "&lng=" + params[0].getLongitude(i));
+                    } catch (MalformedURLException e) {
+                        throw new RuntimeException(e);
+                    }
+                    // Create connection
+                    HttpsURLConnection myConnection;
 
-                try {
-                    myConnection = (HttpsURLConnection) airlyEndpoint.openConnection();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                myConnection.setRequestProperty("Accept",
-                        "application/json");
-                myConnection.setRequestProperty("Accept-Language",
-                        "en");
-                myConnection.setRequestProperty("apikey",
-                        "smD7lvjAAYAmArkXDcACunq0p0OldmTT");
-                StringBuffer response = new StringBuffer();
-                ;
-                try {
-                    if (myConnection.getResponseCode() == 200) {
+                    try {
+                        myConnection = (HttpsURLConnection) airlyEndpoint.openConnection();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    myConnection.setRequestProperty("Accept",
+                            "application/json");
+                    myConnection.setRequestProperty("Accept-Language",
+                            "en");
+                    myConnection.setRequestProperty("apikey",
+                            "smD7lvjAAYAmArkXDcACunq0p0OldmTT");
+                    StringBuffer response = new StringBuffer();
+                    ;
+                    try {
+                        if (myConnection.getResponseCode() == 200) {
 
-                        Log.i("happy", "CONNECTION SUCCESS!");
-                        BufferedReader in = new BufferedReader(new InputStreamReader(myConnection.getInputStream()));
-                        String inputLine;
+                            mSmogParameters.get(index).responseCode = 200;
+                            Log.i("happy", "CONNECTION SUCCESS!");
+                            BufferedReader in = new BufferedReader(new InputStreamReader(myConnection.getInputStream()));
+                            String inputLine;
 
-                        while ((inputLine = in.readLine()) != null) {
-                            response.append(inputLine);
+                            while ((inputLine = in.readLine()) != null) {
+                                response.append(inputLine);
+                            }
+
+
+                            Log.i("Stream data", response.toString());
+                            in.close();
+
+                        }
+                        if (myConnection.getResponseCode() == 429) {
+
+                            Log.i("Stream data", "TO MANY CONNECTION TRIES");
+                            mSmogParameters.get(index).responseCode = 429;
                         }
 
-
-                        Log.i("Stream data", response.toString());
-                        in.close();
-
+                        // Success
+                        // Further processing here
+                        else {
+                            // Error handling code goes here
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
                     }
-                    // Success
-                    // Further processing here
-                    else {
-                        // Error handling code goes here
-                    }
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                try {
-                    //JSONObject rootObject = new JSONObject(response.toString());
+                    try {
+                        if (myConnection.getResponseCode() == 200) {
+                            //JSONObject rootObject = new JSONObject(response.toString());
 
-                    JSONObject object = new JSONObject(response.toString());
+                            JSONObject object = new JSONObject(response.toString());
 
-                    JSONObject address = object.getJSONObject("current");
-                    JSONArray values = address.getJSONArray("values");
-                    if(!values.isNull(0)) {
-                    JSONArray indexes = address.getJSONArray("indexes");
+                            JSONObject address = object.getJSONObject("current");
+                            JSONArray historical = object.getJSONArray("history");
 
-                    JSONObject CAQIindex = indexes.getJSONObject(0);
-                    ArrayList<String> measurementValues = new ArrayList<>();
+//                    for(int j = 0; j<historical.length();j++) {
+//
+//                        JSONObject historicalReadings = historical.getJSONObject(j);
+//                        JSONArray historicalValues = historicalReadings.getJSONArray("values");
+//                        ArrayList<String> measurementValues = new ArrayList<>();
+//                        for (int k = 0; k < historicalValues.length(); k++) {
+//                            JSONObject readValue = historicalValues.getJSONObject(k);
+//                            measurementValues.add(j, readValue.getString("value"));
+//
+//                        }
+//                        params[0].setPm1History(measurementValues.get(0));
+//                        params[0].setPm25History(measurementValues.get(1));
+//                        params[0].setPm10History(measurementValues.get(2));
+//                        params[0].setTemperatureHistory(measurementValues.get(5));
+//                    }
+                            JSONArray values = address.getJSONArray("values");
+                            if (!values.isNull(0)) {
+                                JSONArray indexes = address.getJSONArray("indexes");
 
-                    for (int j = 0; j < values.length(); j++) {
-                        JSONObject readValue = values.getJSONObject(j);
-                        measurementValues.add(j, readValue.getString("value"));
+                                JSONObject CAQIindex = indexes.getJSONObject(0);
+                                ArrayList<String> measurementValues = new ArrayList<>();
 
-                    }
+                                for (int j = 0; j < values.length(); j++) {
+                                    JSONObject readValue = values.getJSONObject(j);
+                                    measurementValues.add(j, readValue.getString("value"));
 
-                        params[0].pm1 = measurementValues.get(0);
-                        params[0].pm25 = measurementValues.get(1);
-                        params[0].pm10 = measurementValues.get(2);
-                        params[0].temperature = measurementValues.get(5);
+                                }
+
+
+                                mSmogParameters.get(index).pm1 = measurementValues.get(0);
+                                mSmogParameters.get(index).pm25 = measurementValues.get(1);
+                                mSmogParameters.get(index).pm10 = measurementValues.get(2);
+                                mSmogParameters.get(index).temperature = measurementValues.get(5);
+//                                params[0].pm1 = measurementValues.get(0);
+//                                params[0].pm25 = measurementValues.get(1);
+//                                params[0].pm10 = measurementValues.get(2);
+//                                params[0].temperature = measurementValues.get(5);
 
 //                for (int i = 0; i<CAQIindex.length();i++){
 //                    JSONObject readValue = CAQIindex.getJSONObject(i);
 //                    measurementValues.add(i,readValue.getString("value"));
 //                }
-                        params[0].indexName = CAQIindex.getString("name");
-                        params[0].indexValue = CAQIindex.getString("value");
-                        params[0].indexLevel = CAQIindex.getString("level");
-                        params[0].indexDescription = CAQIindex.getString("description");
-                        params[0].indexAdvice = CAQIindex.getString("advice");
-                        params[0].indexColor = CAQIindex.getString("color");
+                                mSmogParameters.get(index).indexName = CAQIindex.getString("name");
+                                //mSmogParameters.get(index).indexValue = CAQIindex.getString("value");
+                                mSmogParameters.get(index).indexLevel = CAQIindex.getString("level");
+                                mSmogParameters.get(index).indexDescription = CAQIindex.getString("description");
+                                mSmogParameters.get(index).indexAdvice = CAQIindex.getString("advice");
+                                mSmogParameters.get(index).indexColor = CAQIindex.getString("color");
 
 
-                    //mPolylinesData.get(params[0].routeIndex).setPm1(Double.parseDouble(params[0].pm1));
-                    //mPolylinesData.get(params[0].routeIndex).setPm10(Double.parseDouble(params[0].pm10));
-                    //mPolylinesData.get(params[0].routeIndex).setPm25(Double.parseDouble(params[0].pm25));
-                    pm1Array.add(Double.parseDouble(measurementValues.get(0)));
-                    pm10Array.add(Double.parseDouble(measurementValues.get(2)));
-                    pm25Array.add(Double.parseDouble(measurementValues.get(1)));
-                    }
+                                //mPolylinesData.get(params[0].routeIndex).setPm1(Double.parseDouble(params[0].pm1));
+                                //mPolylinesData.get(params[0].routeIndex).setPm10(Double.parseDouble(params[0].pm10));
+                                //mPolylinesData.get(params[0].routeIndex).setPm25(Double.parseDouble(params[0].pm25));
+                                pm1Array.add(Double.parseDouble(measurementValues.get(0)));
+                                pm10Array.add(Double.parseDouble(measurementValues.get(2)));
+                                pm25Array.add(Double.parseDouble(measurementValues.get(1)));
+                                CAQIArray.add(Double.parseDouble(CAQIindex.getString("value")));
+                                pm1HistoryArray.add(Double.parseDouble(measurementValues.get(0)));
+                            } else {
+
+                            }
+                        }
 //                Log.i("street",address.getString("street"));
 //                Log.i("number",address.getString("number"));
 //                Log.i("displayAddress1",address.getString("displayAddress1"));
 //                Log.i("displayAddress2",address.getString("displayAddress2"));
 
 
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
-            }
-            params[0].mediumPm1 = params[0].calculateMediumPm(pm1Array);
-            params[0].mediumPm10 = params[0].calculateMediumPm(pm10Array);
-            params[0].mediumPm25 = params[0].calculateMediumPm(pm25Array);
+                }
+                if(mSmogParameters.get(index).responseCode == 200) {
+                    mSmogParameters.get(index).mediumPm1 = params[0].calculateMediumPm(pm1Array);
+                    mSmogParameters.get(index).mediumPm10 = params[0].calculateMediumPm(pm10Array);
+                    mSmogParameters.get(index).mediumPm25 = params[0].calculateMediumPm(pm25Array);
+                    mSmogParameters.get(index).indexValue = params[0].calculateMediumPm(CAQIArray);
+                }
+                    passedParameter = params[0];
+
             return params[0];
         }
 
         @Override
-        protected void onPostExecute(MySmogParameters params) {
-            DecimalFormat format = new DecimalFormat("##.00");
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+            loadingCircle.setVisibility(View.VISIBLE);
 
-            smogStatsLayout.animate();
-            smogStatsLayout.setVisibility(View.VISIBLE);
-
-
-            int percentPm1 = (int)((params.mediumPm1 / 25) *100);
-            int percentPm10 = (int)((params.mediumPm10 / 50)*100);
-            int percentPm25 = (int)((params.mediumPm25 / 25)*100);
-
-
-            pm1Progress.setProgress(percentPm1);
-
-
-            pm10Progress.setProgress(percentPm10);
-            pm25Progress.setProgress(percentPm25);
-
-
-            pm1RouteValue.setText(String.valueOf(format.format(params.mediumPm1)));
-            pm1RouteValue.setTextColor(Color.parseColor(params.indexColor));
-
-            pm10RouteValue.setText(String.valueOf(format.format(params.mediumPm10)));
-            pm10RouteValue.setTextColor(Color.parseColor(params.indexColor));
-
-            pm25RouteValue.setText(String.valueOf(format.format(params.mediumPm25)));
-            pm25RouteValue.setTextColor(Color.parseColor(params.indexColor));
         }
+
+        @Override
+        protected void onPostExecute(MySmogParameters params) {
+
+            if (mSmogParameters.get(0).responseCode == 429) {
+
+                AlertDialog alertDialog = new AlertDialog.Builder(RunActivity.this).create();
+                alertDialog.setTitle("Please buy full version!");
+                alertDialog.setMessage("Unfortunately you have exceeded your daily limit of route searches. Please buy full version to get unlimited ammount of running!");
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                System.exit(0);
+                            }
+                        });
+                alertDialog.show();
+
+
+            }
+//            DecimalFormat format = new DecimalFormat("##.00");
+//
+//            smogStatsLayout.animate();
+//            smogStatsLayout.setVisibility(View.VISIBLE);
+//
+//
+//            int percentPm1 = (int)((params.mediumPm1 / 25) *100);
+//            int percentPm10 = (int)((params.mediumPm10 / 50)*100);
+//            int percentPm25 = (int)((params.mediumPm25 / 25)*100);
+//
+//
+//            pm1Progress.setProgress(percentPm1);
+//
+//
+//            pm10Progress.setProgress(percentPm10);
+//            pm25Progress.setProgress(percentPm25);
+//
+//
+//            pm1RouteValue.setText(String.valueOf(format.format(params.mediumPm1)));
+//            pm1RouteValue.setTextColor(Color.parseColor(params.indexColor));
+//
+//            pm10RouteValue.setText(String.valueOf(format.format(params.mediumPm10)));
+//            pm10RouteValue.setTextColor(Color.parseColor(params.indexColor));
+//
+//            pm25RouteValue.setText(String.valueOf(format.format(params.mediumPm25)));
+//            pm25RouteValue.setTextColor(Color.parseColor(params.indexColor));
+            loadingCircle.setVisibility(View.INVISIBLE);
+        }
+
+
+        public MySmogParameters returnParameter()
+        {
+            return passedParameter;
+        }
+
+    }
+
+    public void showCustomToast(String text)
+    {
+        LayoutInflater inflater2 = getLayoutInflater();
+        View layout2 = inflater2.inflate(R.layout.activity_toast_default_view,
+                (ViewGroup) findViewById(R.id.toast_layout_root));
+
+
+        TextView text2 = (TextView) layout2.findViewById(R.id.text);
+        text2.setText(text);
+
+        Toast toast2 = new Toast(getApplicationContext());
+        toast2.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
+        toast2.setDuration(Toast.LENGTH_SHORT);
+        toast2.setView(layout2);
+        toast2.show();
     }
 }
 
