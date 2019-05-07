@@ -1140,7 +1140,7 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
                         historicalPm1.add(measurementValues.get(0));
                         historicalPm25.add(measurementValues.get(1));
                         historicalPm10.add(measurementValues.get(2));
-                        historicalTemperature.add(measurementValues.get(5));
+
                     }
                             mSmogParameters.get(index).setPm1History(historicalPm1);
                             mSmogParameters.get(index).setPm25History(historicalPm1);
