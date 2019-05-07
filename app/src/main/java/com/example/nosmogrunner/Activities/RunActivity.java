@@ -37,6 +37,12 @@ import com.example.nosmogrunner.models.MySmogParameters;
 import com.example.nosmogrunner.models.PolylineData;
 import com.example.nosmogrunner.models.UserLocation;
 import com.example.nosmogrunner.services.LocationService;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -69,6 +75,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -123,8 +130,15 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
     public ProgressBar pm1Progress;
     public ProgressBar pm25Progress;
     public ProgressBar pm10Progress;
+
+
     public RelativeLayout smogStatsLayout;
     public RelativeLayout smogComparisonLayout;
+    public RelativeLayout historicalLayout;
+
+
+
+    public ImageButton beforeButton;
 
     public ProgressBar loadingCircle;
 
@@ -182,6 +196,28 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
         cleanestRouteText = findViewById(R.id.cleanestRouteText);
         cleanestRouteImage.setVisibility(View.INVISIBLE);
         cleanestRouteText.setVisibility(View.INVISIBLE);
+        historicalLayout = findViewById(R.id.historyLayout);
+        historicalLayout.setVisibility(View.INVISIBLE);
+
+        beforeButton = findViewById(R.id.imageBefore);
+
+
+        beforeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if(historicalLayout.getVisibility() == View.INVISIBLE)
+                {
+                    historicalLayout.setVisibility(View.VISIBLE);
+                    beforeButton.setImageResource(R.drawable.ic_next);
+                }
+                if(historicalLayout.getVisibility() == View.VISIBLE)
+                {
+                    historicalLayout.setVisibility(View.INVISIBLE);
+                    beforeButton.setImageResource(R.drawable.ic_before);
+                }
+            }
+        });
 
 
     }
@@ -900,6 +936,66 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
                         cleanestRouteImage.setVisibility(View.VISIBLE);
                     }
 
+
+                    ArrayList hours = new ArrayList();
+                    Calendar calendar = Calendar.getInstance();
+                    //calendar.setTime(yourdate);
+                    int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+
+                    for(int i = 24;i>0;i--)
+                    {
+                        hours.add((float)(-i));
+                    }
+                    int indicate = index;
+
+
+
+                    List<Entry> pmEntries1 = new ArrayList<Entry>();
+                    List<Entry> pmEntries10 = new ArrayList<Entry>();
+                    List<Entry> pmEntries25 = new ArrayList<Entry>();
+
+
+                            LineChart pmChart = (LineChart) findViewById(R.id.pmChart);
+
+                            for(int i = 0; i<mSmogParameters.get(indicate).pm1HistoryMedium.size();i++)
+                            {
+                                Double number1 =(Double) mSmogParameters.get(indicate).pm1HistoryMedium.get(i);
+                                Double number10 =(Double) mSmogParameters.get(indicate).pm10HistoryMedium.get(i);
+                                Double number25 =(Double) mSmogParameters.get(indicate).pm25HistoryMedium.get(i);
+                                pmEntries1.add(new Entry((float)hours.get(i),number1.floatValue()));
+                                pmEntries10.add(new Entry((float)hours.get(i),number10.floatValue()));
+                                pmEntries25.add(new Entry((float)hours.get(i),number25.floatValue()));
+                            }
+                            LineDataSet dataSet1 = new LineDataSet(pmEntries1, "PM1");
+                            LineDataSet dataSet10 = new LineDataSet(pmEntries1, "PM 10");
+                            LineDataSet dataSet25 = new LineDataSet(pmEntries1, "PM 25");
+
+                            dataSet1.setAxisDependency(YAxis.AxisDependency.LEFT);
+                            dataSet1.setColor(R.color.blue);
+                            dataSet10.setAxisDependency(YAxis.AxisDependency.LEFT);
+                            dataSet10.setColor(R.color.bright_red);
+                            dataSet25.setAxisDependency(YAxis.AxisDependency.LEFT);
+                            dataSet25.setColor(R.color.green);
+//                            LineData lineData = new LineData(dataSet1);
+//                            LineData lineData2 = new LineData(dataSet10);
+//                            LineData lineData3 = new LineData(dataSet25);
+                            List<ILineDataSet> dataSets = new ArrayList<ILineDataSet>();
+                            dataSets.add(dataSet1);
+                            dataSets.add(dataSet10);
+                            dataSets.add(dataSet25);
+
+                            LineData data = new LineData(dataSets);
+
+                            pmChart.setData(data);
+                           // pmChart.setData(lineData2);
+                           // pmChart.setData(lineData3);
+                            pmChart.setVisibility(View.VISIBLE);
+
+                            pmChart.invalidate();
+
+
+
+
 //                if(mSmogParameters.get(index).indexColor == null)
 //                {
 //                    mSmogParameters.get(index).indexColor = "#000";
@@ -913,6 +1009,8 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
                     pm25RouteValue.setText(String.valueOf(format.format(mSmogParameters.get(index).mediumPm25)));
                     pm25RouteValue.setTextColor(Color.parseColor(mSmogParameters.get(index).indexColor));
 
+                    historicalLayout.animate();
+                    historicalLayout.setVisibility(View.VISIBLE);
                     smogStatsLayout.animate();
                     smogStatsLayout.setVisibility(View.VISIBLE);
 
@@ -954,7 +1052,7 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
             ArrayList pm25Array = new ArrayList();
             ArrayList CAQIArray = new ArrayList();
 
-    ArrayList pm1HistoryArray = new ArrayList();
+                ArrayList pm1HistoryArray = new ArrayList();
                 ArrayList pm10HistoryArray = new ArrayList();
                 ArrayList pm25HistoryArray = new ArrayList();
                 int index = params[0].routeIndex;
@@ -1023,21 +1121,31 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
                             JSONObject address = object.getJSONObject("current");
                             JSONArray historical = object.getJSONArray("history");
 
-//                    for(int j = 0; j<historical.length();j++) {
-//
-//                        JSONObject historicalReadings = historical.getJSONObject(j);
-//                        JSONArray historicalValues = historicalReadings.getJSONArray("values");
-//                        ArrayList<String> measurementValues = new ArrayList<>();
-//                        for (int k = 0; k < historicalValues.length(); k++) {
-//                            JSONObject readValue = historicalValues.getJSONObject(k);
-//                            measurementValues.add(j, readValue.getString("value"));
-//
-//                        }
-//                        params[0].setPm1History(measurementValues.get(0));
-//                        params[0].setPm25History(measurementValues.get(1));
-//                        params[0].setPm10History(measurementValues.get(2));
-//                        params[0].setTemperatureHistory(measurementValues.get(5));
-//                    }
+
+                            ArrayList<String> historicalPm1 = new ArrayList<>();
+                            ArrayList<String> historicalPm10 = new ArrayList<>();
+                            ArrayList<String> historicalPm25 = new ArrayList<>();
+                            ArrayList<String> historicalTemperature = new ArrayList<>();
+                    for(int j = 0; j<historical.length();j++) {
+
+                        JSONObject historicalReadings = historical.getJSONObject(j);
+                        JSONArray historicalValues = historicalReadings.getJSONArray("values");
+                        ArrayList<String> measurementValues = new ArrayList<>();
+                        for (int k = 0; k < historicalValues.length(); k++) {
+                            JSONObject readValue = historicalValues.getJSONObject(k);
+                            measurementValues.add(k, readValue.getString("value"));
+
+                        }
+
+                        historicalPm1.add(measurementValues.get(0));
+                        historicalPm25.add(measurementValues.get(1));
+                        historicalPm10.add(measurementValues.get(2));
+                        historicalTemperature.add(measurementValues.get(5));
+                    }
+                            mSmogParameters.get(index).setPm1History(historicalPm1);
+                            mSmogParameters.get(index).setPm25History(historicalPm1);
+                            mSmogParameters.get(index).setPm10History(historicalPm1);
+                            mSmogParameters.get(index).setTemperatureHistory(historicalPm1);
                             JSONArray values = address.getJSONArray("values");
                             if (!values.isNull(0)) {
                                 JSONArray indexes = address.getJSONArray("indexes");
@@ -1103,6 +1211,10 @@ public class RunActivity extends MainMenuActivity implements OnMapReadyCallback,
                     mSmogParameters.get(index).mediumPm10 = params[0].calculateMediumPm(pm10Array);
                     mSmogParameters.get(index).mediumPm25 = params[0].calculateMediumPm(pm25Array);
                     mSmogParameters.get(index).indexValue = params[0].calculateMediumPm(CAQIArray);
+                    mSmogParameters.get(index).pm1HistoryMedium = mSmogParameters.get(index).calculateMediumHistory(mSmogParameters.get(index).pm1History);
+                    mSmogParameters.get(index).pm10HistoryMedium = mSmogParameters.get(index).calculateMediumHistory(mSmogParameters.get(index).pm10History);
+                    mSmogParameters.get(index).pm25HistoryMedium = mSmogParameters.get(index).calculateMediumHistory(mSmogParameters.get(index).pm25History);
+                    mSmogParameters.get(index).temperatureHistoryMedium = mSmogParameters.get(index).calculateMediumHistory(mSmogParameters.get(index).temperatureHistory);
                 }
                     passedParameter = params[0];
 

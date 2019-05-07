@@ -20,10 +20,16 @@ public class MySmogParameters {
     public double mediumPm10;
     public double mediumPm25;
 
-    private ArrayList pm1History;
-    private ArrayList pm10History;
-    private ArrayList pm25History;
-    private ArrayList temperatureHistory;
+    public ArrayList<ArrayList<String>> pm1History;
+    public ArrayList<ArrayList<String>> pm10History;
+    public ArrayList<ArrayList<String>> pm25History;
+    public ArrayList<ArrayList<String>> temperatureHistory;
+
+    public ArrayList pm1HistoryMedium;
+    public ArrayList pm10HistoryMedium;
+    public ArrayList pm25HistoryMedium;
+    public ArrayList temperatureHistoryMedium;
+
 
     private ArrayList latitude;
     private ArrayList longitude;
@@ -38,10 +44,14 @@ public class MySmogParameters {
     public MySmogParameters() {
         latitude = new ArrayList();
         longitude = new ArrayList();
-        pm1History = new ArrayList();
-        pm10History = new ArrayList();
-        pm25History = new ArrayList();
-        temperatureHistory = new ArrayList();
+        pm1HistoryMedium = new ArrayList();
+        pm10HistoryMedium= new ArrayList();
+        pm25HistoryMedium= new ArrayList();
+        temperatureHistoryMedium= new ArrayList();
+        pm1History = new ArrayList<ArrayList<String>>();
+        pm10History = new ArrayList<ArrayList<String>>();
+        pm25History = new ArrayList<ArrayList<String>>();
+        temperatureHistory = new ArrayList<ArrayList<String>>();
     }
 
     public int length(){
@@ -72,20 +82,48 @@ public class MySmogParameters {
         return medium;
     }
 
-    public void setPm1History(String pm1) {
+
+    public void setPm1History(ArrayList pm1) {
+
         pm1History.add(pm1);
     }
 
-    public void setPm10History(String pm10) {
+    public void setPm10History(ArrayList pm10) {
         pm10History.add(pm10);
     }
 
-    public void setPm25History(String pm25) {
+    public void setPm25History(ArrayList pm25) {
+
         pm25History.add(pm25);
     }
-    public void setTemperatureHistory(String temp)
+    public void setTemperatureHistory(ArrayList temp)
     {
-        temperatureHistory.add(temperature);
+        temperatureHistory.add(temp);
     }
+
+    public ArrayList calculateMediumHistory(ArrayList<ArrayList<String>> myArray)
+    {
+        ArrayList mediumHistory = new ArrayList();
+
+            int firstArraySize = myArray.size();
+            for(int j = 0; j<myArray.get(0).size();j++)
+            {
+                double medium = 0;
+                for(int i = 0; i<firstArraySize;i++) {
+                   medium =medium + (Double.parseDouble(myArray.get(i).get(j)));
+
+                }
+                double calculatedMedium = medium/firstArraySize;
+                mediumHistory.add(calculatedMedium);
+            }
+
+
+
+
+
+
+        return mediumHistory;
+    }
+
 
 }
